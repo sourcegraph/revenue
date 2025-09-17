@@ -73,6 +73,7 @@ command_exists() {
 essential_tools=(
   "git:Git version control:system"
   "curl:Command line HTTP client:system"
+  "ghostty:Cross-platform terminal emulator:brew"
   "jetbrains-toolbox:JetBrains Toolbox:brew"
   "jq:JSON processor:brew"
   "mise:mise-en-place:brew"
@@ -227,20 +228,20 @@ cmd_update() {
     # Install any missing essential packages
     print_info "Checking for missing packages..."
     missing_packages=()
-    
+
     for tool_info in "${essential_tools[@]}"; do
       IFS=':' read -r package description install_method <<<"$tool_info"
-      
+
       if [[ "$install_method" == "system" ]]; then
         # Skip system tools like git/curl
         continue
       fi
-      
+
       if ! brew list "$package" &>/dev/null; then
         missing_packages+=("$package")
       fi
     done
-    
+
     if [[ ${#missing_packages[@]} -gt 0 ]]; then
       print_info "Installing missing packages: ${missing_packages[*]}"
       for package in "${missing_packages[@]}"; do

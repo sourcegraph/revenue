@@ -143,6 +143,11 @@ terraform      1.12.2
 
 ### Misc. Applications and Tools
 
+#### Ghostty
+
+[Ghostty](https://ghostty.org/docs) is a fast, feature-rich, and cross-platform
+terminal emulator that uses platform-native UI and GPU acceleration.
+
 #### tree
 
 list contents of directories in a tree-like format.
