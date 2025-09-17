@@ -1,0 +1,12 @@
+# name,description,method,source
+git,Git version control,system,
+curl,Command-line HTTP client,system,
+amp,Amp AI coding agent,curl,https://ampcode.com/install.sh
+ghostty,Cross-platform terminal emulator,brew,
+jetbrains-toolbox,JetBrains Toolbox,brew,
+jq,JSON processor,brew,
+mise,mise-en-place,brew,
+python,Python Programming Language,brew,
+temurin,Eclipse Temurin JDK,brew,
+tree,Directory tree viewer,brew,
+visual-studio-code,Visual Studio Code,brew,
