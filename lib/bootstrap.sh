@@ -30,7 +30,7 @@ bootstrap_prerequisites() {
   if ! command_exists "brew"; then
     print_info "Installing Homebrew (required for other tools)..."
     # Process only Homebrew from tools.csv first
-    while IFS=, read -r name desc method source; do
+    while IFS=, read -r name _ method source; do
       [[ $name == \#* || -z $name ]] && continue
       name=$(echo "$name" | xargs)
       if [[ "$name" == "brew" ]]; then
@@ -65,7 +65,7 @@ process_tools() {
   fi
 
   # Process each tool from the CSV file
-  while IFS=, read -r name desc method source; do
+  while IFS=, read -r name _ method source; do
     # Skip comments and empty lines
     [[ $name == \#* || -z $name ]] && continue
 
@@ -93,7 +93,8 @@ setup_global_command() {
 
   # Get the absolute path of the main script
   local main_script="$SCRIPT_DIR/setup.sh"
-  local script_path="$(realpath "$main_script")"
+  local script_path
+  script_path="$(realpath "$main_script")"
 
   # Create ~/.local/bin if it doesn't exist
   local local_bin_dir="$HOME/.local/bin"
@@ -116,12 +117,12 @@ setup_global_command() {
 
   # Check if ~/.local/bin is in PATH
   if [[ ":$PATH:" != *":$local_bin_dir:"* ]]; then
-    print_warning "~/.local/bin is not in your PATH"
+    print_warning "$HOME/.local/bin is not in your PATH"
     print_info "Add this line to your shell profile (~/.zshrc or ~/.bash_profile):"
     echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
     print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
   else
-    print_success "~/.local/bin is already in your PATH"
+    print_success "$HOME/.local/bin is already in your PATH"
     print_info "You can now run 'revenue-setup' from anywhere"
   fi
 }
@@ -131,7 +132,7 @@ configure_mise() {
 
   # Check common bash profile files on macOS
   local bash_profiles=("$HOME/.bashrc" "$HOME/.bash_profile")
-  local mise_activation='eval "$(mise activate bash)"'
+  local mise_activation="eval \"\$(mise activate bash)\""
   local profile_updated=false
 
   for profile in "${bash_profiles[@]}"; do
@@ -152,9 +153,11 @@ configure_mise() {
     touch "$target_profile"
 
     # Add mise activation
-    echo "" >>"$target_profile"
-    echo "# Initialize mise" >>"$target_profile"
-    echo "$mise_activation" >>"$target_profile"
+    {
+      echo ""
+      echo "# Initialize mise"
+      echo "$mise_activation"
+    } >>"$target_profile"
 
     print_success "Added mise activation to $(basename "$target_profile")"
     print_info "Restart your terminal or run: source $target_profile"
@@ -164,7 +167,8 @@ configure_mise() {
 update_repository() {
   # Check if we're in a git repository and update from main if applicable
   if [[ -d ".git" ]]; then
-    local current_branch=$(git branch --show-current 2>/dev/null || echo "")
+    local current_branch
+    current_branch=$(git branch --show-current 2>/dev/null || echo "")
     if [[ "$current_branch" == "main" ]]; then
       print_info "Updating repository from main..."
       git pull origin main

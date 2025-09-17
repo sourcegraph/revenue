@@ -47,11 +47,13 @@ ensure_tool() {
 
 # Function to load all installer modules
 load_installers() {
-  local script_dir="$(dirname "${BASH_SOURCE[0]}")"
+  local script_dir
+  script_dir="$(dirname "${BASH_SOURCE[0]}")"
   local installers_dir="$script_dir/../installers"
   
   for installer_file in "$installers_dir"/*.sh; do
     if [[ -f "$installer_file" ]]; then
+      # shellcheck source=/dev/null
       source "$installer_file"
     fi
   done
