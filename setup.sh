@@ -4,8 +4,9 @@
 
 set -e # Exit on any error
 
-# Get the script directory
-SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+# Get the real script directory (resolving symlinks)
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 
 # Source the bootstrap functionality
 source "$SCRIPT_DIR/lib/bootstrap.sh"
