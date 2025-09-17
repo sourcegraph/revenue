@@ -15,7 +15,7 @@ load_installers
 
 bootstrap_prerequisites() {
   print_info "Checking prerequisites..."
-  
+
   # Check if Xcode Command Line Tools are installed
   if ! command_exists "git"; then
     print_info "Installing Xcode Command Line Tools..."
@@ -26,11 +26,27 @@ bootstrap_prerequisites() {
     print_success "Xcode Command Line Tools are already installed"
   fi
 
-  # Install Homebrew if not present
+  # Ensure Homebrew is installed first (required for other brew-based tools)
   if ! command_exists "brew"; then
-    print_info "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    print_success "Homebrew installed successfully"
+    print_info "Installing Homebrew (required for other tools)..."
+    # Process only Homebrew from tools.csv first
+    while IFS=, read -r name desc method source; do
+      [[ $name == \#* || -z $name ]] && continue
+      name=$(echo "$name" | xargs)
+      if [[ "$name" == "brew" ]]; then
+        method=$(echo "$method" | xargs)
+        source=$(echo "$source" | xargs)
+        ensure_tool "$name" "$method" "$source" "install"
+        break
+      fi
+    done <"$CONFIG_FILE"
+
+    if command_exists "brew"; then
+      print_success "Homebrew installed successfully"
+    else
+      print_error "Failed to install Homebrew - cannot proceed with other tools"
+      exit 1
+    fi
   else
     print_success "Homebrew is already installed"
   fi
@@ -38,29 +54,32 @@ bootstrap_prerequisites() {
 
 process_tools() {
   local action="$1"
-  
+
   print_info "Processing tools with action: $action"
-  
+
   # Update Homebrew if doing updates
   if [[ "$action" == "update" ]] && command_exists "brew"; then
     print_info "Updating Homebrew..."
     brew update
     print_success "Homebrew updated"
   fi
-  
+
   # Process each tool from the CSV file
   while IFS=, read -r name desc method source; do
     # Skip comments and empty lines
     [[ $name == \#* || -z $name ]] && continue
-    
+
     # Trim whitespace
     name=$(echo "$name" | xargs)
     method=$(echo "$method" | xargs)
     source=$(echo "$source" | xargs)
-    
+
+    # Skip Homebrew as it's handled in bootstrap_prerequisites
+    [[ "$name" == "brew" ]] && continue
+
     ensure_tool "$name" "$method" "$source" "$action"
-  done < "$CONFIG_FILE"
-  
+  done <"$CONFIG_FILE"
+
   # Cleanup if doing updates
   if [[ "$action" == "update" ]] && command_exists "brew"; then
     print_info "Cleaning up Homebrew..."
@@ -160,28 +179,28 @@ update_repository() {
 # Main bootstrap function
 bootstrap() {
   local action="$1"
-  
+
   check_macos
-  
+
   case "$action" in
-    "init")
-      print_info "Initializing development environment..."
-      bootstrap_prerequisites
-      process_tools "install"
-      setup_global_command
-      configure_mise
-      print_success "Environment initialization completed!"
-      ;;
-    "update")
-      print_info "Updating environment..."
-      update_repository
-      bootstrap_prerequisites  # Ensure Homebrew is still available
-      process_tools "update"
-      print_success "Environment update completed!"
-      ;;
-    *)
-      print_error "Unknown action: $action"
-      exit 1
-      ;;
+  "init")
+    print_info "Initializing development environment..."
+    bootstrap_prerequisites
+    process_tools "install"
+    setup_global_command
+    configure_mise
+    print_success "Environment initialization completed!"
+    ;;
+  "update")
+    print_info "Updating environment..."
+    update_repository
+    bootstrap_prerequisites # Ensure Homebrew is still available
+    process_tools "update"
+    print_success "Environment update completed!"
+    ;;
+  *)
+    print_error "Unknown action: $action"
+    exit 1
+    ;;
   esac
 }

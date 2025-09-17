@@ -1,6 +1,7 @@
 # name,description,method,source
 git,Git version control,system,
 curl,Command-line HTTP client,system,
+brew,Homebrew package manager,curl,https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
 amp,Amp AI coding agent,curl,https://ampcode.com/install.sh
 ghostty,Cross-platform terminal emulator,brew,
 jetbrains-toolbox,JetBrains Toolbox,brew,
