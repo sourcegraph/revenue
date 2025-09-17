@@ -12,8 +12,13 @@ brew_install() {
     if brew install "$name"; then
       print_success "$name installed successfully"
     else
-      print_error "Failed to install $name"
-      exit 1
+      print_warning "Installation failed, trying with --adopt to handle existing files..."
+      if brew install --adopt "$name"; then
+        print_success "$name installed successfully (adopted existing installation)"
+      else
+        print_error "Failed to install $name even with --adopt"
+        exit 1
+      fi
     fi
   fi
 }
