@@ -60,6 +60,11 @@ Press Enter to open https://github.com/login/device in your browser...
 ✓ Logged in as trly
 ```
 
+### Run Demo Applications
+
+See the [Demo Application Manager](/amp_demos/README.md) README for details on
+launching demo applications.
+
 ## Revenue Team Application Manifest
 
 This list is everything that will be installed on your workstation when running
