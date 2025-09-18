@@ -40,13 +40,12 @@ cd ~/revenue
 ./setup.sh init
 ```
 
-Once `init` has been run once, a link to the script will be added to your system
-so that you can run the main application as `revenue`
+Once `init` has been run once, a global `revenue` command will be added to your system:
 
 ```bash
-revenue init
-revenue update
-revenue demo
+revenue init      # Initialize workstation  
+revenue update    # Update existing tools
+revenue demo      # Manage demo applications
 ```
 
 ### Authenticate the GitHub CLI
@@ -108,9 +107,9 @@ details and examples.
 ## Revenue Team Application Manifest
 
 This list is everything that will be installed on your workstation when running
-`revenue init` or `revenue-setup init`
+`revenue init`. All dependencies are managed via [Brewfile](/Brewfile).
 
-To update existing installed tools, run `revenue update` or `revenue-setup update`
+To update existing installed tools, run `revenue update`
 
 ### Editors and IDEs
 
@@ -159,9 +158,9 @@ and integrate systems more effectively.
 
 Git is a free and open source distributed version control system
 
-#### GitHub CLI
+#### Amp CLI
 
-Desktop client for GitHub repositories
+Command-line interface for Amp AI coding assistant
 
 #### mise
 

@@ -5,30 +5,26 @@
 - `./setup.sh init` - Initialize workstation with development tools
 - `./setup.sh update` - Update existing tools and packages  
 - `./setup.sh help` - Show usage help
-- `revenue-setup init|update` - Global command after setup
+- `revenue init|update|demo` - Global command after setup
 
 ## Demo Management Commands
 
-- `./setup.sh demo start <language> <framework>` - Start a demo application
-- `./setup.sh demo stop <language> <framework>` - Stop a specific demo
-- `./setup.sh demo stop all` - Stop all running demos
-- `./setup.sh demo list` - List all available demos
-- `./setup.sh demo running` - List currently running demos
-- `./setup.sh demo clean --confirm` - Reset demo directory
+- `revenue demo start <language> <framework>` - Start a demo application
+- `revenue demo stop <language> <framework>` - Stop a specific demo
+- `revenue demo stop all` - Stop all running demos
+- `revenue demo list` - List all available demos
+- `revenue demo running` - List currently running demos
+- `revenue demo clean --confirm` - Reset demo directory
 - Direct usage: `cd amp_demos && ./demo.sh <command>`
 
 ## Architecture
 
-This is a macOS workstation setup tool for Sourcegraph Revenue team
+This is a macOS workstation setup tool for Sourcegraph Revenue team using a simplified, Brewfile-based approach.
 
 Key components:
 
-- `setup.sh` - Main setup script entry point, delegates demo commands to `amp_demos/demo.sh`
-- `lib/bootstrap.sh` - Core setup logic and tool processing
-- `lib/utils.sh` - Utility functions for colored output and validation
-- `lib/installer_registry.sh` - Tool installer management
-- `installers/` - Installation methods (brew.sh, curl.sh, system.sh)
-- `tools.csv` - Manifest of tools to install (Amp, VS Code, JetBrains, Python, etc.)
+- `setup.sh` - Single, self-contained setup script with all logic integrated
+- `Brewfile` - Homebrew dependency management (formulae, casks, VS Code extensions)
 - `amp_demos/demo.sh` - Demo application manager using tmux sessions
 
 ### Demo System Architecture

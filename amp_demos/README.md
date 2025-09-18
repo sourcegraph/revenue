@@ -37,7 +37,16 @@ The `install` field is optional and runs before the `start` command. The `port` 
 
 You can use the demo manager directly or through the main setup script:
 
-### Via setup.sh (recommended)
+### Via revenue command (recommended)
+
+```bash
+# From anywhere (after running ./setup.sh init)
+revenue demo start <language> <framework>
+revenue demo stop <language> <framework>  
+revenue demo list
+```
+
+### Via setup.sh
 
 ```bash
 # From the repository root
