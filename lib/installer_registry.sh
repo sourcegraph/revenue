@@ -28,6 +28,12 @@ dispatch_installer() {
     "curl:update")
       curl_update "$name" "$source"
       ;;
+    "vscode_extensions:install")
+      vscode_extensions_install "$name" "$source"
+      ;;
+    "vscode_extensions:update")
+      vscode_extensions_update "$name" "$source"
+      ;;
     *)
       print_error "No handler registered for method '$method' with action '$action'"
       exit 1
