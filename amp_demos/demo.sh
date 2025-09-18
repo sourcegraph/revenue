@@ -119,6 +119,36 @@ start_app() {
   fi
 }
 
+# Start all demo applications
+start_all() {
+  local apps=($(discover_apps))
+  
+  if [[ ${#apps[@]} -eq 0 ]]; then
+    print_warning "No demo applications found"
+    return 0
+  fi
+  
+  print_info "Starting all demo applications..."
+  local started=0
+  local failed=0
+  
+  for app in "${apps[@]}"; do
+    IFS=':' read -r language framework <<< "$app"
+    print_info "Starting $language/$framework..."
+    
+    if start_app "$language" "$framework"; then
+      ((started++))
+    else
+      ((failed++))
+    fi
+  done
+  
+  print_success "Started $started demo applications"
+  if [[ $failed -gt 0 ]]; then
+    print_warning "$failed demo applications failed to start"
+  fi
+}
+
 # Stop a demo application
 stop_app() {
   local language="$1"
@@ -215,6 +245,7 @@ show_usage() {
   echo ""
   echo "Usage:"
   echo "  demo.sh start <language> <framework>   Start a demo application"
+  echo "  demo.sh start all                      Start all demo applications"
   echo "  demo.sh stop <language> <framework>    Stop a demo application"
   echo "  demo.sh stop all                       Stop all demo applications"
   echo "  demo.sh list                           List all available demos"
@@ -224,6 +255,7 @@ show_usage() {
   echo ""
   echo "Examples:"
   echo "  demo.sh start python flask"
+  echo "  demo.sh start all"
   echo "  demo.sh stop javascript react"
   echo "  demo.sh stop all"
   echo ""
@@ -237,7 +269,11 @@ main() {
 
   case "$command" in
   start)
-    start_app "$2" "$3"
+    if [[ "$2" == "all" ]]; then
+      start_all
+    else
+      start_app "$2" "$3"
+    fi
     ;;
   stop)
     if [[ "$2" == "all" ]]; then
