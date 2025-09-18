@@ -1,7 +1,7 @@
 # Demo Application Manager
 
 The demo application manager allows running multiple language/framework demos in
-isolated sessions.
+isolated tmux sessions with proper tool management.
 
 ## Directory Structure
 
@@ -12,13 +12,33 @@ amp_demos/
 ├── demo.sh
 ├── <language>/
 │   └── <framework>/
-│       ├── start_demo.sh  # Required entry point
-│       └── ...            # Your demo files
+│       ├── start_demo.sh    # Required entry point
+│       ├── .mise.toml       # Optional: tool requirements
+│       └── ...              # Your demo files
 ```
 
 Only directories containing `start_demo.sh` are recognized as valid demos.
 
 ## Usage
+
+You can use the demo manager directly or through the main setup script:
+
+### Via setup.sh (recommended)
+
+```bash
+# From the repository root
+./setup.sh demo start <language> <framework>
+./setup.sh demo stop <language> <framework>
+./setup.sh demo list
+```
+
+### Direct usage
+
+```bash
+# From amp_demos directory
+cd amp_demos
+./demo.sh start <language> <framework>
+```
 
 ### Start a Demo
 

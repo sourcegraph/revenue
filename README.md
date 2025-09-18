@@ -62,8 +62,26 @@ Press Enter to open https://github.com/login/device in your browser...
 
 ### Run Demo Applications
 
-See the [Demo Application Manager](/amp_demos/README.md) README for details on
-launching demo applications.
+The setup script includes a demo manager for running language/framework demonstrations:
+
+```bash
+# Start a demo application
+./setup.sh demo start <language> <framework>
+
+# Stop a specific demo
+./setup.sh demo stop <language> <framework>
+
+# Stop all demos
+./setup.sh demo stop all
+
+# List available demos
+./setup.sh demo list
+
+# List running demos
+./setup.sh demo running
+```
+
+See the [Demo Application Manager](/amp_demos/README.md) README for complete details and examples.
 
 ## Revenue Team Application Manifest
 
