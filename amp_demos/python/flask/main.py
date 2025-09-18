@@ -11,7 +11,7 @@ def main():
     port = int(os.environ.get('FLASK_PORT', 8000))
     debug = app.config.get('DEBUG', False)
     
-    print(f"Starting Flask Pet Store API on http://{host}:{port}")
+    print(f"Starting Flask Demo on http://{host}:{port}")
     app.run(host=host, port=port, debug=debug)
 
 
