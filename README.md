@@ -172,7 +172,6 @@ multiple versions of tools globally or,specific to individual projects.
 revenue on  main [!?] took 12s
 ❯ mise list
 Tool           Version            Source  Requested
-bun            1.2.20
 bun            1.2.22
 caddy          2.9.1
 go             1.20
