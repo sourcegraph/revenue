@@ -27,11 +27,14 @@ COMMANDS:
     
     update      Update existing tools and packages
     
+    demo        Manage demo applications (delegates to amp_demos/demo.sh)
+    
     help        Show this help message
 
 EXAMPLES:
     ./setup.sh init
     ./setup.sh update
+    ./setup.sh demo start python flask
     ./setup.sh help
 
 For more information, visit: https://github.com/sourcegraph/revenue
@@ -47,6 +50,12 @@ main() {
     ;;
   "update")
     bootstrap "update"
+    ;;
+  "demo")
+    # Delegate to amp_demos/demo.sh with remaining arguments
+    shift # Remove 'demo' from arguments
+    cd "$SCRIPT_DIR/amp_demos"
+    exec "./demo.sh" "$@"
     ;;
   "help" | "-h" | "--help")
     show_help

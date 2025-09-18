@@ -103,8 +103,15 @@ setup_global_command() {
     print_success "Created $local_bin_dir directory"
   fi
 
+  # Remove old revenue-setup symlink if it exists
+  local old_symlink_path="$local_bin_dir/revenue-setup"
+  if [[ -L "$old_symlink_path" || -f "$old_symlink_path" ]]; then
+    rm "$old_symlink_path"
+    print_success "Removed old revenue-setup symlink"
+  fi
+
   # Create symlink
-  local symlink_path="$local_bin_dir/revenue-setup"
+  local symlink_path="$local_bin_dir/revenue"
   if [[ -L "$symlink_path" ]]; then
     rm "$symlink_path"
   elif [[ -f "$symlink_path" ]]; then
@@ -113,7 +120,7 @@ setup_global_command() {
   fi
 
   ln -s "$script_path" "$symlink_path"
-  print_success "Created global command: revenue-setup"
+  print_success "Created global command: revenue"
 
   # Check if ~/.local/bin is in PATH
   if [[ ":$PATH:" != *":$local_bin_dir:"* ]]; then
@@ -123,7 +130,7 @@ setup_global_command() {
     print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
   else
     print_success "$HOME/.local/bin is already in your PATH"
-    print_info "You can now run 'revenue-setup' from anywhere"
+    print_info "You can now run 'revenue' from anywhere"
   fi
 }
 
