@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}Home - Flask Demo{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 2rem 0;">
+    <h2>Welcome to the Flask Demo Application!</h2>
+    
+    <p style="font-size: 1.2em; margin-bottom: 2rem; color: #666;">
+        This is a demonstration application built with Flask and Jinja2 templating engine.
+    </p>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin-top: 3rem;">
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 300px;">
+            <h3 style="color: #4a5568; margin-top: 0;">🐍 Flask Framework</h3>
+            <p>Built with Python's lightweight and flexible web framework for rapid development.</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 300px;">
+            <h3 style="color: #4a5568; margin-top: 0;">🎨 Jinja2 Templates</h3>
+            <p>Using Jinja2 templating engine for powerful, maintainable HTML generation with template inheritance.</p>
+        </div>
+    </div>
+ 
+    <div style="margin-top: 3rem;">
+        <h3>Getting Started</h3>
+        <p>This application demonstrates the integration of Flask with Jinja2 templates for server-side rendering.</p>
+        <p>Explore the codebase to see how routes, templates, and configuration work together.</p>
+    </div>
+</div>
+{% endblock %}
