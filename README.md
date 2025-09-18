@@ -40,6 +40,15 @@ cd ~/revenue
 ./setup.sh init
 ```
 
+Once `init` has been run once, a link to the script will be added to your system
+so that you can run the main application as `revenue`
+
+```bash
+revenue init
+revenue update
+revenue demo
+```
+
 ### Authenticate the GitHub CLI
 
 This will configure the gh CLI to use HTTPS authentication and allow the `gh`
@@ -62,45 +71,46 @@ Press Enter to open https://github.com/login/device in your browser...
 
 ### Run Demo Applications
 
-The setup script includes a demo manager for running language/framework demonstrations:
+This repository includes a demo manager for running language/framework demonstrations:
 
 ```bash
 # Start a demo application
-./setup.sh demo start <language> <framework>
+revenue demo start <language> <framework>
 
 # Start all available demos
-./setup.sh demo start all
+revenue demo start all
 
 # Stop a specific demo
-./setup.sh demo stop <language> <framework>
+revenue demo stop <language> <framework>
 
 # Stop all demos
-./setup.sh demo stop all
+revenue demo stop all
 
 # List available demos
-./setup.sh demo list
+revenue demo list
 
 # List running demos
-./setup.sh demo running
+revenue demo running
 
 # View logs from a running demo
-./setup.sh demo logs <language> <framework>
+revenue demo logs <language> <framework>
 
 # Attach to a running demo session
-./setup.sh demo attach <language> <framework>
+revenue demo attach <language> <framework>
 
 # Clean and reset demo directory
-./setup.sh demo clean --confirm
+revenue demo clean --confirm
 ```
 
-See the [Demo Application Manager](/amp_demos/README.md) README for complete details and examples.
+See the [Demo Application Manager](/amp_demos/README.md) README for complete
+details and examples.
 
 ## Revenue Team Application Manifest
 
 This list is everything that will be installed on your workstation when running
-`./setup.sh init` or `revenue-setup init`
+`revenue init` or `revenue-setup init`
 
-To update existing installed tools, run `./setup.sh update` or `revenue-setup update`
+To update existing installed tools, run `revenue update` or `revenue-setup update`
 
 ### Editors and IDEs
 
@@ -108,6 +118,14 @@ To update existing installed tools, run `./setup.sh update` or `revenue-setup up
 
 VS Code is a free code editor, which runs on the macOS, Linux, and Windows
 operating systems.
+
+**Extensions**:
+Several VS Code extensions are automatically installed for you when you run
+`revenue init`
+
+- Amp
+- Java Support
+- Python Support
 
 #### JetBrains Toolbox App
 
