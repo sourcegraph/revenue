@@ -77,8 +77,6 @@ EOF
 
 # Install prerequisites (Xcode CLT and Homebrew)
 install_prerequisites() {
-  print_info "Checking prerequisites..."
-
   # Check if Xcode Command Line Tools are installed
   if ! command_exists "git"; then
     print_info "Installing Xcode Command Line Tools..."
@@ -94,7 +92,7 @@ install_prerequisites() {
     print_info "Installing Homebrew..."
     if curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash; then
       print_success "Homebrew installed successfully"
-      
+
       # Add Homebrew to PATH for current session
       if [[ -f "/opt/homebrew/bin/brew" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -112,10 +110,8 @@ install_prerequisites() {
 
 # Install dependencies via Brewfile
 install_brewfile_dependencies() {
-  print_info "Installing dependencies via Brewfile..."
-  
   cd "$SCRIPT_DIR"
-  if brew bundle install; then
+  if brew bundle install --quiet; then
     print_success "Brewfile dependencies installed successfully"
   else
     print_error "Failed to install Brewfile dependencies"
@@ -125,23 +121,21 @@ install_brewfile_dependencies() {
 
 # Update dependencies via Brewfile
 update_brewfile_dependencies() {
-  print_info "Updating Homebrew and dependencies..."
-  
   # Update Homebrew first
   brew update
-  
+
   # Upgrade outdated formulae
   brew upgrade
-  
+
   # Install/update via Brewfile
   cd "$SCRIPT_DIR"
-  if brew bundle install; then
+  if brew bundle install --quiet; then
     print_success "Dependencies updated successfully"
   else
     print_error "Failed to update dependencies"
     exit 1
   fi
-  
+
   # Cleanup
   brew cleanup
   print_success "Cleanup completed"
@@ -149,9 +143,7 @@ update_brewfile_dependencies() {
 
 # Install Amp CLI
 install_amp_cli() {
-  if command_exists "amp"; then
-    print_success "Amp CLI: already installed"
-  else
+  if ! command_exists "amp"; then
     print_info "Installing Amp CLI..."
     if curl -fsSL https://ampcode.com/install.sh | bash; then
       print_success "Amp CLI: installed successfully"
@@ -162,20 +154,18 @@ install_amp_cli() {
   fi
 }
 
-# Update Amp CLI  
 update_amp_cli() {
-  if command_exists "amp"; then
-    print_info "Amp CLI: installed - updates handled automatically by Amp"
-  else
-    print_info "Amp CLI: not found, installing..."
+  if ! command_exists "amp"; then
     install_amp_cli
+  else
+    {
+      amp update
+    }
   fi
 }
 
 # Setup global revenue command
 setup_global_command() {
-  print_info "Setting up global command..."
-
   # Get the absolute path of this script
   local script_path
   script_path="$(realpath "$SCRIPT_DIR/setup.sh")"
@@ -214,14 +204,11 @@ setup_global_command() {
     print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
   else
     print_success "$HOME/.local/bin is already in your PATH"
-    print_info "You can now run 'revenue' from anywhere"
   fi
 }
 
 # Configure mise shell integration
 configure_mise() {
-  print_info "Configuring mise activation..."
-
   # Check common bash profile files on macOS
   local bash_profiles=("$HOME/.bashrc" "$HOME/.bash_profile")
   local mise_activation="eval \"\$(mise activate bash)\""
@@ -263,9 +250,7 @@ update_repository() {
     local current_branch
     current_branch=$(git branch --show-current 2>/dev/null || echo "")
     if [[ "$current_branch" == "main" ]]; then
-      print_info "Updating repository from main..."
       git pull origin main
-      print_success "Repository updated from main"
     elif [[ -n "$current_branch" ]]; then
       print_warning "Repository is on branch '$current_branch', not 'main'"
       print_warning "Installed applications may be out of date. Consider switching to main branch."
@@ -275,7 +260,6 @@ update_repository() {
 
 # Initialize development environment
 init_environment() {
-  print_info "Initializing development environment..."
   check_macos
   install_prerequisites
   install_brewfile_dependencies
@@ -287,7 +271,6 @@ init_environment() {
 
 # Update development environment
 update_environment() {
-  print_info "Updating development environment..."
   check_macos
   update_repository
   install_prerequisites # Ensure Homebrew is still available
