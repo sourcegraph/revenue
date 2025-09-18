@@ -1,0 +1,22 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+      port: 35729
+    remote:
+      restart:
+        enabled: false
+  thymeleaf:
+    cache: false
+    mode: HTML
+    encoding: UTF-8
+
+server:
+  port: 8081
+
+logging:
+  level:
+    com.sourcegraph.revenue: DEBUG
+    org.springframework.boot.devtools: DEBUG

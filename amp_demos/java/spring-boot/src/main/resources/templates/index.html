@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Spring Boot Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            margin: 0;
+            color: #4a5568;
+            text-align: center;
+        }
+        
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spring Boot Demo Application</h1>
+        </header>
+        
+        <main class="content">
+            <div style="text-align: center; padding: 2rem 0;">
+                <h2>Welcome to the Spring Boot Demo Application!</h2>
+                
+                <p style="font-size: 1.2em; margin-bottom: 2rem; color: #666;">
+                    This is a demonstration application built with Spring Boot and Thymeleaf templating engine.
+                </p>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin-top: 3rem;">
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 300px;">
+                        <h3 style="color: #4a5568; margin-top: 0;">🚀 Spring Boot Framework</h3>
+                        <p>Built with Java's powerful and opinionated framework for rapid application development and production-ready features.</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 300px;">
+                        <h3 style="color: #4a5568; margin-top: 0;">🎨 Thymeleaf Templates</h3>
+                        <p>Using Thymeleaf templating engine for server-side HTML generation with natural template capabilities.</p>
+                    </div>
+                </div>
+             
+                <div style="margin-top: 3rem;">
+                    <h3>Getting Started</h3>
+                    <p>This application demonstrates the integration of Spring Boot with Thymeleaf templates for server-side rendering.</p>
+                    <p>Explore the codebase to see how controllers, templates, and auto-configuration work together seamlessly.</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2025 Sourcegraph Revenue Team</p>
+        </footer>
+    </div>
+</body>
+</html>
