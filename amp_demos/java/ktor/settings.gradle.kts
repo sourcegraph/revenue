@@ -1,3 +1,3 @@
-rootProject.name = "ktor-pet-store"
+rootProject.name = "java-ktor-demo"
 
 dependencyResolutionManagement { repositories { mavenCentral() } }
