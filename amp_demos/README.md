@@ -57,27 +57,35 @@ cd amp_demos
 ### Start a Demo
 
 ```bash
-./demo.sh start <language> <framework>
+./demo.sh start <language> <framework>   # Start a specific demo
+./demo.sh start all                      # Start all available demos
 ```
 
 ### Stop a Demo
 
 ```bash
-./demo.sh stop <language> <framework>
-./demo.sh stop all  # Stop all running demos
+./demo.sh stop <language> <framework>    # Stop a specific demo
+./demo.sh stop all                       # Stop all running demos
+```
+
+### View and Interact with Demos
+
+```bash
+./demo.sh logs <language> <framework>    # View current logs from a running demo
+./demo.sh attach <language> <framework>  # Attach to a running demo session
 ```
 
 ### List Demos
 
 ```bash
-./demo.sh list     # Show all available demos and their status
-./demo.sh running  # Show only running demos
+./demo.sh list                           # Show all available demos and their status
+./demo.sh running                        # Show only running demos
 ```
 
 ### Clean Environment
 
 ```bash
-./demo.sh clean --confirm  # Reset git state and stop all demos
+./demo.sh clean --confirm                # Reset git state and stop all demos
 ```
 
 ## How It Works
@@ -94,8 +102,14 @@ cd amp_demos
 # Start a Python Flask demo
 ./demo.sh start python flask
 
+# Start all available demos
+./demo.sh start all
+
+# View logs from a running demo
+./demo.sh logs python flask
+
 # Attach to running demo
-tmux -L revenue-demo attach -t python-flask
+./demo.sh attach python flask
 
 # Stop all demos
 ./demo.sh stop all

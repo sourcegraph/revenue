@@ -68,6 +68,9 @@ The setup script includes a demo manager for running language/framework demonstr
 # Start a demo application
 ./setup.sh demo start <language> <framework>
 
+# Start all available demos
+./setup.sh demo start all
+
 # Stop a specific demo
 ./setup.sh demo stop <language> <framework>
 
@@ -79,6 +82,15 @@ The setup script includes a demo manager for running language/framework demonstr
 
 # List running demos
 ./setup.sh demo running
+
+# View logs from a running demo
+./setup.sh demo logs <language> <framework>
+
+# Attach to a running demo session
+./setup.sh demo attach <language> <framework>
+
+# Clean and reset demo directory
+./setup.sh demo clean --confirm
 ```
 
 See the [Demo Application Manager](/amp_demos/README.md) README for complete details and examples.
