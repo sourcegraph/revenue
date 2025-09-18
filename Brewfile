@@ -3,6 +3,7 @@
 
 # Core development tools
 brew "git"
+brew "gh"
 brew "jq"
 brew "mise"
 brew "python"
@@ -11,10 +12,11 @@ brew "tree"
 brew "yq"
 
 # Applications
-cask "visual-studio-code"
-cask "jetbrains-toolbox"
+cask "github"
 cask "ghostty"
+cask "jetbrains-toolbox"
 cask "temurin"
+cask "visual-studio-code"
 
 # VS Code Extensions
 vscode "sourcegraph.amp"
