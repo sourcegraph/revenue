@@ -7,6 +7,10 @@ echo "- Enable hot reload for Pebble template changes"
 echo "- Watch for changes in classes and resources"
 echo ""
 
+# Build dependencies first
+echo "Building dependencies..."
+./gradlew build -x test --quiet
+
 # Run Gradle with continuous build in the background
 echo "Starting continuous build process..."
 ./gradlew -t build -x test --quiet &
