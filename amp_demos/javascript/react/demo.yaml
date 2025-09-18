@@ -1,0 +1,5 @@
+language: javascript
+framework: react
+port: 3000
+install: pnpm install --silent
+start: pnpm start

@@ -33,16 +33,26 @@ Key components:
 
 ### Demo System Architecture
 
-The demo system manages multiple language/framework combinations:
+The demo system manages multiple language/framework combinations using a config-based approach:
 
-- **Discovery**: Scans `amp_demos/` for directories containing `start_demo.sh` files
+- **Discovery**: Scans `amp_demos/` for directories containing `demo.yaml` configuration files
 - **Session Management**: Uses tmux with server name "revenue-demo" to isolate sessions
-- **Tool Management**: Integrates with `mise` for per-demo tool installation
-- **Directory Structure**: `amp_demos/<language>/<framework>/start_demo.sh`
+- **Tool Management**: Integrates with `mise` for per-demo tool installation and YAML parsing
+- **Directory Structure**: `amp_demos/<language>/<framework>/demo.yaml`
 
 Each demo application must have:
-- `start_demo.sh` - Executable script to start the application
+- `demo.yaml` - Configuration file specifying how to start the application
 - Optional: `.mise.toml` or `.tool-versions` for tool requirements
+
+#### Demo Configuration Format
+
+```yaml
+language: javascript    # Language identifier
+framework: react       # Framework identifier  
+port: 3000            # Application port (for URL display)
+install: pnpm install --silent  # Optional: dependency installation command
+start: pnpm start     # Required: command to start the application
+```
 
 Demo sessions are named as `<language>-<framework>` and run in tmux for easy management.
 

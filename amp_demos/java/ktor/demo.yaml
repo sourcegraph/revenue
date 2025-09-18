@@ -1,0 +1,5 @@
+language: java
+framework: ktor
+port: 8080
+install: ./gradlew build -x test --quiet
+start: ./gradlew run

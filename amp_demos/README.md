@@ -1,7 +1,7 @@
 # Demo Application Manager
 
 The demo application manager allows running multiple language/framework demos in
-isolated tmux sessions with proper tool management.
+isolated tmux sessions using configuration files.
 
 ## Directory Structure
 
@@ -12,12 +12,26 @@ amp_demos/
 ├── demo.sh
 ├── <language>/
 │   └── <framework>/
-│       ├── start_demo.sh    # Required entry point
+│       ├── demo.yaml        # Required configuration file
 │       ├── .mise.toml       # Optional: tool requirements
 │       └── ...              # Your demo files
 ```
 
-Only directories containing `start_demo.sh` are recognized as valid demos.
+Only directories containing `demo.yaml` are recognized as valid demos.
+
+## Configuration Format
+
+Each demo requires a `demo.yaml` configuration file:
+
+```yaml
+language: javascript    # Language identifier
+framework: react       # Framework identifier  
+port: 3000            # Application port (for URL display)
+install: pnpm install --silent  # Optional: dependency installation command
+start: pnpm start     # Required: command to start the application
+```
+
+The `install` field is optional and runs before the `start` command. The `port` field is used to display the application URL.
 
 ## Usage
 
@@ -68,10 +82,11 @@ cd amp_demos
 
 ## How It Works
 
-1. **Discovery**: Scans subdirectories for `start_demo.sh` files
+1. **Discovery**: Scans subdirectories for `demo.yaml` configuration files
 2. **Environment**: Runs `mise install` in each demo directory (if available)
-3. **Session Management**: Creates isolated tmux sessions named `<language>-<framework>`
-4. **Execution**: Runs `start_demo.sh` within the mise environment
+3. **Config Parsing**: Reads the demo configuration using `yq`
+4. **Session Management**: Creates isolated tmux sessions named `<language>-<framework>`
+5. **Execution**: Runs install and start commands within the mise environment
 
 ## Examples
 
