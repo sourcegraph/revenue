@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, jsonify, request
-from app.models import Pet
 
 bp = Blueprint('main', __name__)
 
