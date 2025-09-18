@@ -158,3 +158,9 @@ list contents of directories in a tree-like format.
 
 [jq](https://github.com/jqlang/jq) is a lightweight and flexible command-line
 JSON processor akin to sed,awk,grep, and friends for JSON data
+
+#### tmux
+
+[tmux](https://github.com/tmux/tmux/wiki) is tmux is a terminal multiplexer. It
+lets you switch easily between several programs in one terminal, detach them
+(they keep running in the background) and reattach them to a different terminal.
