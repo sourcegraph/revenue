@@ -130,6 +130,9 @@ update_brewfile_dependencies() {
   # Update Homebrew first
   brew update
   
+  # Upgrade outdated formulae
+  brew upgrade
+  
   # Install/update via Brewfile
   cd "$SCRIPT_DIR"
   if brew bundle install; then
