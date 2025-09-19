@@ -2,7 +2,6 @@
 
 # Sourcegraph Revenue Team Workstation Bootstrap Installer
 # This script clones/updates the repository and runs the initialization
-# Updated to test workflow path filtering
 
 set -e
 
