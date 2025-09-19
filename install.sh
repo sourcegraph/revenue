@@ -358,6 +358,16 @@ configure_mise() {
     print_success "Added mise activation to $(basename "$profile_path")"
     print_info "Restart your terminal or run: source $profile_path"
   fi
+
+  # Trust the repository's .mise.toml to avoid warning messages
+  cd "$repo_dir"
+  if [[ -f ".mise.toml" ]]; then
+    if mise trust >/dev/null 2>&1; then
+      print_success "Trusted .mise.toml configuration"
+    else
+      print_info "Note: Run 'mise trust' in $repo_dir to avoid warning messages"
+    fi
+  fi
 }
 
 # Run the main installer
