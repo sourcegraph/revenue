@@ -16,15 +16,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Get short commit SHA
+    - name: Generate version
       id: vars
-      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      run: |
+        echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        # Create version based on date + short commit (e.g., v2025.01.19.abc1234)
+        echo "version=v$(date +%Y.%m.%d).$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       
     - name: Create or update release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: latest
-        name: Latest Installer
+        tag_name: ${{ steps.vars.outputs.version }}
+        name: "Revenue Installer ${{ steps.vars.outputs.version }}"
         body: |
           🚀 **Revenue Team Workstation Installer**
           
