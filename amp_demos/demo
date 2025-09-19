@@ -43,13 +43,6 @@ discover_apps() {
   printf '%s\n' "${apps[@]}"
 }
 
-# Get session name for overmind
-get_session_name() {
-  local language="$1"
-  local framework="$2"
-  echo "${language}-${framework}"
-}
-
 # Get port from .env file
 get_port() {
   local app_dir="$1"
@@ -60,8 +53,14 @@ get_port() {
   fi
 }
 
-# Prepare demo environment
-prepare_demo_environment() {
+# Simple check if overmind is running for this app
+is_running() {
+  local app_dir="$1"
+  [[ -S "$app_dir/.overmind.sock" ]]
+}
+
+# Start a single demo
+start_demo() {
   local language="$1"
   local framework="$2"
   local app_dir="$language/$framework"
@@ -76,96 +75,66 @@ prepare_demo_environment() {
     return 1
   fi
 
-  # Trust and install mise tools if mise config exists
-  if [[ -f "$app_dir/.mise.toml" || -f "$app_dir/.tool-versions" ]]; then
-    print_info "Installing required tools with mise..."
-    if ! (cd "$app_dir" && mise trust 2>/dev/null && mise install 2>/dev/null); then
-      print_warning "mise install failed or no mise configuration found"
-    fi
-  fi
-
-  return 0
-}
-
-# Start a demo application
-start_app() {
-  local language="$1"
-  local framework="$2"
-
-  if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo start <language> <framework>"
-    return 1
-  fi
-
-  local session_name
-  session_name=$(get_session_name "$language" "$framework")
-  local app_dir="$language/$framework"
-
-  # Prepare the demo environment
-  if ! prepare_demo_environment "$language" "$framework"; then
-    return 1
-  fi
-
-  # Check if session already exists
-  if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
+  if is_running "$app_dir"; then
     local port
     port=$(get_port "$app_dir")
-    print_warning "Demo $language/$framework is already running"
-    if [[ -n "$port" ]]; then
-      print_info "Application available at: http://localhost:$port"
-    fi
+    print_warning "$language/$framework is already running"
+    [[ -n "$port" ]] && print_info "Available at: http://localhost:$port"
     return 0
   fi
 
-  print_info "Starting $language/$framework demo..."
+  print_info "Starting $language/$framework..."
 
-  # Run setup if it exists in Procfile, then start
   (
-  cd "$app_dir"
-  if grep -q "^setup:" Procfile; then
-    print_info "Installing dependencies..."
-    local setup_cmd
-    setup_cmd=$(grep "^setup:" Procfile | cut -d':' -f2- | sed 's/^ *//')
-    mise exec -- bash -c "$setup_cmd" || true
-  fi
-  # Create a temporary Procfile with only web processes for overmind  
-  if grep -q "^setup:" Procfile; then
-    cp Procfile Procfile.orig
-    grep -v "^setup:" Procfile.orig > Procfile
-  fi
-  mise exec -- overmind start -s "$session_name" -D
-  if [ -f Procfile.orig ]; then
-    mv Procfile.orig Procfile
-  fi
-  ) &
+    cd "$app_dir"
 
-  # Wait a moment and check status
-  sleep 3
-  local status_check=0
-  for i in {1..3}; do
-    if (cd "$app_dir" && overmind status -s "$session_name" 2>/dev/null | grep -q "web.*running"); then
-      status_check=1
-      break
+    # Use mise to ensure dependencies are available
+    if [[ -f ".mise.toml" || -f ".tool-versions" ]]; then
+      mise install >/dev/null 2>&1 || true
     fi
-    sleep 2
+
+    # Start overmind in daemon mode - let it handle everything
+    overmind start -D
+  )
+
+  # Simple wait for overmind socket to appear
+  local count=0
+  while [[ $count -lt 15 ]]; do
+    if is_running "$app_dir"; then
+      local port
+      port=$(get_port "$app_dir")
+      print_success "Started $language/$framework"
+      [[ -n "$port" ]] && print_info "Available at: http://localhost:$port"
+      return 0
+    fi
+    sleep 1
+    count=$((count + 1))
   done
-  
-  if [ $status_check -eq 1 ]; then
-    local port
-    port=$(get_port "$app_dir")
-    print_success "Started $language/$framework demo"
-    if [[ -n "$port" ]]; then
-      print_info "Application available at: http://localhost:$port"
-    fi
-    print_info "View logs: revenue demo logs $language $framework"
-    print_info "Connect: revenue demo connect $language $framework"
-  else
-    print_error "Failed to start $language/$framework demo"
-    return 1
-  fi
+
+  print_error "Failed to start $language/$framework (timeout)"
+  return 1
 }
 
-# Start all demo applications
+# Stop a single demo
+stop_demo() {
+  local language="$1"
+  local framework="$2"
+  local app_dir="$language/$framework"
+
+  if ! is_running "$app_dir"; then
+    print_warning "$language/$framework is not running"
+    return 0
+  fi
+
+  print_info "Stopping $language/$framework..."
+
+  # Let overmind handle graceful shutdown
+  (cd "$app_dir" && overmind quit)
+
+  print_success "Stopped $language/$framework"
+}
+
+# Start all demos
 start_all() {
   local apps=()
   while IFS= read -r line; do
@@ -183,7 +152,7 @@ start_all() {
 
   for app in "${apps[@]}"; do
     IFS=':' read -r language framework <<<"$app"
-    if start_app "$language" "$framework"; then
+    if start_demo "$language" "$framework"; then
       started=$((started + 1))
     else
       failed=$((failed + 1))
@@ -191,34 +160,10 @@ start_all() {
   done
 
   print_success "Started $started demo applications"
-  if [[ $failed -gt 0 ]]; then
-    print_warning "$failed demo applications failed to start"
-  fi
+  [[ $failed -gt 0 ]] && print_warning "$failed demo applications failed to start"
 }
 
-# Stop a demo application
-stop_app() {
-  local language="$1"
-  local framework="$2"
-
-  if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo stop <language> <framework>"
-    return 1
-  fi
-
-  local session_name
-  session_name=$(get_session_name "$language" "$framework")
-  local app_dir="$language/$framework"
-
-  if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
-    (cd "$app_dir" && overmind quit -s "$session_name")
-    print_success "Stopped $language/$framework demo"
-  else
-    print_warning "$language/$framework demo is not running"
-  fi
-}
-
-# Stop all demo applications
+# Stop all demos
 stop_all() {
   local apps=()
   while IFS= read -r line; do
@@ -233,150 +178,186 @@ stop_all() {
   print_info "Stopping all demo applications..."
   for app in "${apps[@]}"; do
     IFS=':' read -r language framework <<<"$app"
-    stop_app "$language" "$framework"
+    stop_demo "$language" "$framework"
   done
 }
 
-# View logs from a demo application
-logs_app() {
+# Restart a single demo
+restart_demo() {
   local language="$1"
   local framework="$2"
+
+  stop_demo "$language" "$framework"
+  sleep 1
+  start_demo "$language" "$framework"
+}
+
+# Restart all demos
+restart_all() {
+  stop_all
+  sleep 2
+  start_all
+}
+
+# List all demos with their status
+list_demos() {
+  print_info "Available demo applications:"
+
+  discover_apps | while IFS=':' read -r language framework; do
+    local app_dir="$language/$framework"
+    local port
+    port=$(get_port "$app_dir")
+
+    if is_running "$app_dir"; then
+      local url_info=""
+      [[ -n "$port" ]] && url_info=" - http://localhost:$port"
+      printf "  %-20s %s%s\n" "$language/$framework" "(running)" "$url_info"
+    else
+      printf "  %-20s %s\n" "$language/$framework" "(stopped)"
+    fi
+  done
+}
+
+# List only running demos
+list_running() {
+  print_info "Running demo applications:"
+
+  discover_apps | while IFS=':' read -r language framework; do
+    local app_dir="$language/$framework"
+    local port
+    port=$(get_port "$app_dir")
+
+    if is_running "$app_dir"; then
+      local url_info=""
+      [[ -n "$port" ]] && url_info=" - http://localhost:$port"
+      printf "  %-20s %s%s\n" "$language/$framework" "(running)" "$url_info"
+    fi
+  done
+}
+
+# Show logs for a demo - use overmind's native echo command
+show_logs() {
+  local language="$1"
+  local framework="$2"
+  local app_dir="$language/$framework"
 
   if [[ -z "$language" || -z "$framework" ]]; then
     print_error "Usage: demo logs <language> <framework>"
     return 1
   fi
 
-  local session_name
-  session_name=$(get_session_name "$language" "$framework")
-  local app_dir="$language/$framework"
-
-  if ! (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
-    print_error "$language/$framework demo is not running"
+  if ! is_running "$app_dir"; then
+    print_error "$language/$framework is not running"
     return 1
   fi
 
-  print_info "Logs from $language/$framework demo:"
-  print_info "Press Ctrl+C to exit logs"
-  echo ""
-  
-  # Find the overmind tmux socket for this session
-  local tmux_socket
-  local tmux_session_name="$framework"  # overmind uses just the framework name
-  tmux_socket=$(ps aux | grep "tmux.*$tmux_session_name" | grep -v grep | head -1 | sed -n 's/.*-L \([^ ]*\).*/\1/p')
-  
-  if [[ -n "$tmux_socket" ]]; then
-    # Set up clean exit on interrupt with a flag
-    local continue_logs=1
-    trap 'continue_logs=0; printf "\r\033[K"; print_info "Exited logs"' INT
-    
-    # Use tmux to capture and follow the pane output
-    tmux -L "$tmux_socket" capture-pane -t "$tmux_session_name" -p
-    echo ""
-    print_info "Following live logs (press Ctrl+C to exit):"
-    
-    while [ $continue_logs -eq 1 ]; do
-      sleep 2
-      if [ $continue_logs -eq 1 ]; then
-        tmux -L "$tmux_socket" capture-pane -t "$tmux_session_name" -p | tail -10
-      fi
-    done
-    trap - INT
-  else
-    print_error "Could not find tmux session for $language/$framework"
-    return 1
-  fi
+  print_info "Showing logs for $language/$framework (Ctrl+C to exit):"
+  (cd "$app_dir" && overmind echo)
 }
 
-# Connect to a demo application
-connect_app() {
+# Connect to a demo - use overmind's native connect command
+connect_demo() {
   local language="$1"
   local framework="$2"
+  local app_dir="$language/$framework"
 
   if [[ -z "$language" || -z "$framework" ]]; then
     print_error "Usage: demo connect <language> <framework>"
     return 1
   fi
 
-  local session_name
-  session_name=$(get_session_name "$language" "$framework")
-  local app_dir="$language/$framework"
-
-  if ! (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
-    print_error "$language/$framework demo is not running"
+  if ! is_running "$app_dir"; then
+    print_error "$language/$framework is not running"
     return 1
   fi
 
-  print_info "Connecting to $language/$framework demo..."
-  (cd "$app_dir" && overmind connect web -s "$session_name")
+  print_info "Connecting to $language/$framework..."
+  (cd "$app_dir" && overmind connect web)
 }
 
-# List all available demos
-list_demos() {
-  print_info "Available demo applications:"
-  discover_apps | while IFS=':' read -r language framework; do
-    local session_name
-    session_name=$(get_session_name "$language" "$framework")
-    local app_dir="$language/$framework"
-    local status="stopped"
-    local url_info=""
-    
-    if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
-      status="running"
-      local port
-      port=$(get_port "$app_dir")
-      if [[ -n "$port" ]]; then
-        url_info=" - http://localhost:$port"
-      fi
-    fi
-    
-    printf "  %-20s %s%s\n" "$language/$framework" "($status)" "$url_info"
-  done
-}
-
-# List running demos
-list_running() {
-  print_info "Running demo applications:"
-  discover_apps | while IFS=':' read -r language framework; do
-    local session_name
-    session_name=$(get_session_name "$language" "$framework")
-    local app_dir="$language/$framework"
-    
-    if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
-      local port
-      port=$(get_port "$app_dir")
-      local url_info=""
-      if [[ -n "$port" ]]; then
-        url_info=" - http://localhost:$port"
-      fi
-      printf "  %-20s %s%s\n" "$language/$framework" "(running)" "$url_info"
-    fi
-  done
-}
-
-# Clean the demo directory (same as original)
-clean_demos() {
+# Force cleanup all processes and sockets
+clean_all() {
   local confirm_flag="$1"
 
   if [[ "$confirm_flag" != "--confirm" ]]; then
-    print_error "This will reset all changes in the demo directory!"
+    print_error "This will forcibly kill all demo processes and clean up all sockets!"
     print_error "Use: demo clean --confirm"
     return 1
   fi
 
-  print_warning "Cleaning demo directory - this will reset all local changes!"
+  print_warning "Cleaning up all demo applications..."
 
-  # Stop all running demos first
-  stop_all
+  discover_apps | while IFS=':' read -r language framework; do
+    local app_dir="$language/$framework"
+    local port
+    port=$(get_port "$app_dir")
 
-  # Reset git state
-  git reset --hard HEAD
-  git clean -fd
+    # Kill overmind sessions
+    if [[ -S "$app_dir/.overmind.sock" ]]; then
+      print_info "Terminating overmind session for $language/$framework"
+      (cd "$app_dir" && overmind quit >/dev/null 2>&1) || true
+      rm -f "$app_dir/.overmind.sock"
+    fi
 
-  print_success "Demo directory cleaned and reset"
+    # Kill orphaned processes on ports
+    if [[ -n "$port" ]]; then
+      local existing_pids
+      existing_pids=$(lsof -t -i ":$port" 2>/dev/null || true)
+      if [[ -n "$existing_pids" ]]; then
+        print_info "Killing orphaned processes for $language/$framework on port $port"
+        echo "$existing_pids" | xargs kill -TERM 2>/dev/null || true
+        sleep 1
+
+        # Force kill if still running
+        existing_pids=$(lsof -t -i ":$port" 2>/dev/null || true)
+        if [[ -n "$existing_pids" ]]; then
+          echo "$existing_pids" | xargs kill -KILL 2>/dev/null || true
+        fi
+      fi
+    fi
+  done
+
+  # Clean up any remaining socket files
+  find . -name ".overmind.sock" -delete 2>/dev/null || true
+
+  print_success "Cleaned up all demo processes and sockets"
 }
 
-# Show usage information
+# Reset all demos to clean git state
+reset_all() {
+  local confirm_flag="$1"
+
+  if [[ "$confirm_flag" != "--confirm" ]]; then
+    print_error "This will forcibly kill all processes AND revert all file changes!"
+    print_error "All modifications made during demo sessions will be lost!"
+    print_error "Use: demo reset --confirm"
+    return 1
+  fi
+
+  print_warning "Resetting all demo applications to clean state..."
+
+  # First clean up all processes and sockets
+  clean_all --confirm
+
+  # Check if we're in a git repository
+  if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    print_error "Not in a git repository - cannot reset file changes"
+    return 1
+  fi
+
+  if ! git restore . 2>/dev/null; then
+    print_warning "Some files could not be restored (may not exist in git)"
+  fi
+
+  if ! git clean -fd 2>/dev/null; then
+    print_warning "Some untracked files could not be cleaned"
+  fi
+
+  print_success "Reset complete - all demo applications restored to clean git state"
+  print_info "Run 'demo start all' to start fresh demo sessions"
+}
+
+# Show usage
 show_usage() {
   echo "Demo Application Manager"
   echo ""
@@ -385,20 +366,22 @@ show_usage() {
   echo "  demo start all                      Start all demo applications"
   echo "  demo stop <language> <framework>    Stop a demo application"
   echo "  demo stop all                       Stop all demo applications"
-  echo "  demo logs <language> <framework>    View logs from a running demo"
+  echo "  demo restart <language> <framework> Restart a demo application"
+  echo "  demo restart all                    Restart all running applications"
+  echo "  demo logs <language> <framework>    Show logs from a running demo"
   echo "  demo connect <language> <framework> Connect to a running demo"
-  echo "  demo list                           List all available demos"
-  echo "  demo running                        List running demos"
-  echo "  demo clean --confirm                Reset demo directory"
+  echo "  demo list                           List all demos with status"
+  echo "  demo running                        List only running demos"
+  echo "  demo clean --confirm                Force cleanup all processes and sockets"
+  echo "  demo reset --confirm                Reset to clean git state (clean + git restore)"
   echo "  demo help                           Show this help"
   echo ""
   echo "Examples:"
   echo "  demo start python flask"
   echo "  demo start all"
   echo "  demo stop javascript react"
-  echo "  demo stop all"
+  echo "  demo restart python flask"
   echo "  demo logs python flask"
-  echo "  demo connect python flask"
   echo ""
 }
 
@@ -407,27 +390,35 @@ main() {
   check_overmind
 
   local command="$1"
+  shift || true
 
   case "$command" in
   start)
-    if [[ "$2" == "all" ]]; then
+    if [[ "$1" == "all" ]]; then
       start_all
     else
-      start_app "$2" "$3"
+      start_demo "$1" "$2"
     fi
     ;;
   stop)
-    if [[ "$2" == "all" ]]; then
+    if [[ "$1" == "all" ]]; then
       stop_all
     else
-      stop_app "$2" "$3"
+      stop_demo "$1" "$2"
+    fi
+    ;;
+  restart)
+    if [[ "$1" == "all" ]]; then
+      restart_all
+    else
+      restart_demo "$1" "$2"
     fi
     ;;
   logs)
-    logs_app "$2" "$3"
+    show_logs "$1" "$2"
     ;;
-  connect|attach)
-    connect_app "$2" "$3"
+  connect)
+    connect_demo "$1" "$2"
     ;;
   list)
     list_demos
@@ -436,14 +427,13 @@ main() {
     list_running
     ;;
   clean)
-    clean_demos "$2"
+    clean_all "$1"
     ;;
-  help | --help | -h)
-    show_usage
+  reset)
+    reset_all "$1"
     ;;
-  "")
+  help | --help | -h | "")
     show_usage
-    exit 1
     ;;
   *)
     print_error "Unknown command: $command"

@@ -1,2 +1,1 @@
-setup: pnpm install
-web: pnpm run dev
+web: exec mise run dev

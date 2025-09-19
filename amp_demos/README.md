@@ -49,7 +49,7 @@ You can use the demo manager directly or through the main setup script:
 ### Via revenue command (recommended)
 
 ```bash
-# From anywhere (after running ./setup.sh init)
+# From anywhere (after running ./install.sh)
 revenue demo start <language> <framework>
 revenue demo stop <language> <framework>  
 revenue demo list
@@ -86,10 +86,17 @@ cd amp_demos
 ./demo stop all                       # Stop all running demos
 ```
 
+### Restart a Demo
+
+```bash
+./demo restart <language> <framework> # Restart a specific demo
+./demo restart all                     # Restart all running demos
+```
+
 ### View and Interact with Demos
 
 ```bash
-./demo logs <language> <framework>    # View logs from a running demo
+./demo logs <language> <framework>    # View logs from a running demo (Ctrl+C to exit)
 ./demo connect <language> <framework> # Connect to a running demo session
 ```
 
@@ -103,7 +110,9 @@ cd amp_demos
 ### Clean Environment
 
 ```bash
-./demo clean --confirm                # Reset git state and stop all demos
+./demo clean --confirm                # Force cleanup all processes and sockets
+./demo reset --confirm                # Reset to clean git state (clean + git restore)
+./demo help                           # Show usage help
 ```
 
 ## How It Works
@@ -124,6 +133,12 @@ named `<language>-<framework>`
 # Start all available demos
 ./demo start all
 
+# Restart a specific demo
+./demo restart python flask
+
+# Restart all running demos
+./demo restart all
+
 # View logs from a running demo
 ./demo logs python flask
 
@@ -135,6 +150,15 @@ named `<language>-<framework>`
 
 # List available demos
 ./demo list
+
+# Show only running demos
+./demo running
+
+# Force cleanup all processes
+./demo clean --confirm
+
+# Reset to clean git state
+./demo reset --confirm
 ```
 
 ## Process Management

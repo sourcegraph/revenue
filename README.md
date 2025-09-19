@@ -23,9 +23,19 @@ needed for demos and development.
 Once setup is complete, you can use the `revenue` command:
 
 ```bash
-revenue demo list        # See available demo apps
-revenue demo start python flask  # Start a specific demo
-revenue update          # Update tools to latest versions
+revenue demo list                    # See available demo apps
+revenue demo running                 # See only running demos
+revenue demo start python flask     # Start a specific demo
+revenue demo start all               # Start all demos
+revenue demo stop python flask      # Stop a specific demo
+revenue demo stop all                # Stop all demos
+revenue demo restart python flask   # Restart a specific demo
+revenue demo restart all             # Restart all running demos
+revenue demo logs python flask      # View logs from a running demo
+revenue demo connect python flask   # Connect to a running demo session
+revenue demo clean --confirm         # Force cleanup all processes and sockets
+revenue demo reset --confirm         # Reset to clean git state
+revenue update                       # Update tools to latest versions
 revenue init --install-path /custom/path  # Reinstall to custom location
 ```
 

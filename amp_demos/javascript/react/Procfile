@@ -1,2 +1,1 @@
-setup: pnpm install --silent
-web: pnpm start
+web: exec mise run dev
