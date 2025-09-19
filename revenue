@@ -294,7 +294,7 @@ main() {
     # Delegate to amp_demos/demo with remaining arguments
     shift # Remove 'demo' from arguments
     cd "$SCRIPT_DIR/amp_demos"
-    exec "./demo" "$@"
+    exec bash "./demo" "$@"
     ;;
   "help" | "-h" | "--help")
     show_help
