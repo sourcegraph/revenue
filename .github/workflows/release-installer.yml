@@ -23,9 +23,37 @@ jobs:
         # Create version based on date + short commit (e.g., v2025.01.19.abc1234)
         echo "version=v$(date +%Y.%m.%d).$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       
-    - name: Create or update release
+    - name: Create release in private repository
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ steps.vars.outputs.version }}
+        name: "Revenue Installer ${{ steps.vars.outputs.version }}"
+        body: |
+          🚀 **Revenue Team Workstation Installer**
+          
+          Internal release for the Revenue team workstation setup.
+          For public access, use: https://github.com/sourcegraph/revenue-installer/releases/latest/download/install.sh
+          
+          **What it does:**
+          - Sets up macOS development environment
+          - Installs VS Code, Python, Java, and other tools
+          - Configures demo applications
+          - Creates global `revenue` command
+          
+          **Requirements:**
+          - macOS (10.15+)
+          - GitHub access to sourcegraph/revenue repository
+          
+          Updated from commit: ${{ steps.vars.outputs.sha_short }}
+        files: |
+          install.sh
+        prerelease: false
+        generate_release_notes: false
+    
+    - name: Create public release
+      uses: softprops/action-gh-release@v2
+      with:
+        repository: sourcegraph/revenue-installer
         tag_name: ${{ steps.vars.outputs.version }}
         name: "Revenue Installer ${{ steps.vars.outputs.version }}"
         body: |
@@ -35,12 +63,12 @@ jobs:
           
           **Usage:**
           ```bash
-          /bin/bash -c "$(curl -fsSL https://github.com/sourcegraph/revenue/releases/latest/download/install.sh)"
+          /bin/bash -c "$(curl -fsSL https://github.com/sourcegraph/revenue-installer/releases/latest/download/install.sh)"
           ```
           
           **What it does:**
           - Sets up macOS development environment
-          - Installs VS Code, Python, Java, and other tools
+          - Installs VS Code, Python, Java, and other tools  
           - Configures demo applications
           - Creates global `revenue` command
           

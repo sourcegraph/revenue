@@ -7,7 +7,7 @@ Complete macOS workstation setup for Revenue team members. Installs all tools ne
 **Copy and paste this command into Terminal:**
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://github.com/sourcegraph/revenue/releases/latest/download/install.sh)"
+/bin/bash -c "$(curl -fsSL https://github.com/sourcegraph/revenue-installer/releases/latest/download/install.sh)"
 ```
 
 **That's it!** The installer will:
