@@ -68,9 +68,9 @@ prepare_demo_environment() {
     return 1
   fi
 
-  # Run mise install to ensure all tools are available
+  # Trust and install mise tools
   print_info "Installing required tools with mise..."
-  if ! (cd "$app_dir" && mise install 2>/dev/null); then
+  if ! (cd "$app_dir" && mise trust 2>/dev/null && mise install 2>/dev/null); then
     print_warning "mise install failed or no mise configuration found"
   fi
 
