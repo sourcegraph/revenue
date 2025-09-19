@@ -5,6 +5,9 @@
 
 set -e
 
+# Global flag to track if shell profile was modified
+shell_profile_modified=false
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -46,7 +49,7 @@ check_macos() {
     print_info "Your system: $OSTYPE"
     exit 1
   fi
-  
+
   print_success "Running on macOS $(sw_vers -productVersion)"
 }
 
@@ -59,7 +62,7 @@ check_git() {
     print_info "Then run this installer again."
     exit 1
   fi
-  
+
   print_success "Git is available"
 }
 
@@ -67,28 +70,28 @@ check_git() {
 check_github_access() {
   local repo_url="https://github.com/sourcegraph/revenue.git"
   local test_url="https://api.github.com/repos/sourcegraph/revenue"
-  
+
   print_info "Checking GitHub access to private repository..."
-  
+
   # First, try to access the repository API to check authentication
   if curl -s -f -H "Authorization: token $(git config --get github.token 2>/dev/null || echo '')" "$test_url" >/dev/null 2>&1; then
     print_success "GitHub access confirmed"
     return 0
   fi
-  
+
   # If that fails, try a simple git ls-remote to test access
   if git ls-remote "$repo_url" >/dev/null 2>&1; then
     print_success "GitHub access confirmed"
     return 0
   fi
-  
+
   # No access - provide authentication guidance
   print_warning "GitHub authentication required for private repository access"
   echo ""
   print_info "Please choose one of these authentication methods:"
   echo ""
   echo "1. GitHub CLI (Recommended):"
-  print_info "   Install: brew install gh"  
+  print_info "   Install: brew install gh"
   print_info "   Login:   gh auth login"
   echo ""
   echo "2. SSH Key:"
@@ -102,25 +105,25 @@ check_github_access() {
   print_info "After authentication, run this installer again."
   print_info "Need repository access? Ask in #ask-tech-ops"
   echo ""
-  
+
   return 1
 }
 
 # Clone or update the repository
 setup_repository() {
-  repo_dir="$HOME/revenue"  # Make repo_dir global for use by other functions
+  repo_dir="$HOME/revenue" # Make repo_dir global for use by other functions
   local repo_url="https://github.com/sourcegraph/revenue.git"
-  
+
   if [[ -d "$repo_dir" ]]; then
     print_info "Repository already exists at $repo_dir"
     print_info "Updating to latest version..."
-    
+
     cd "$repo_dir"
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
       # Save current branch
       local current_branch
       current_branch=$(git branch --show-current 2>/dev/null || echo "")
-      
+
       # Update repository
       git fetch origin >/dev/null 2>&1
       if [[ "$current_branch" == "main" ]]; then
@@ -150,7 +153,7 @@ setup_repository() {
       print_error "Failed to clone repository"
       print_info "This might indicate:"
       print_info "  • Network connectivity issues"
-      print_info "  • GitHub authentication problems" 
+      print_info "  • GitHub authentication problems"
       print_info "  • Missing repository access permissions"
       echo ""
       print_info "Solutions:"
@@ -172,47 +175,52 @@ command_exists() {
 detect_shell() {
   local current_shell
   current_shell=$(basename "$SHELL" 2>/dev/null || echo "unknown")
-  
+
   case "$current_shell" in
-    zsh|bash)
-      echo "$current_shell"
-      ;;
-    *)
-      # Fallback: check what shell is actually running this script
-      if [[ -n "$ZSH_VERSION" ]]; then
-        echo "zsh"
-      elif [[ -n "$BASH_VERSION" ]]; then
-        echo "bash"
-      else
-        # Default to zsh since it's macOS default since 10.15
-        echo "zsh"
-      fi
-      ;;
+  zsh | bash)
+    echo "$current_shell"
+    ;;
+  *)
+    # Fallback: check what shell is actually running this script
+    if [[ -n "$ZSH_VERSION" ]]; then
+      echo "zsh"
+    elif [[ -n "$BASH_VERSION" ]]; then
+      echo "bash"
+    else
+      # Default to zsh since it's macOS default since 10.15
+      echo "zsh"
+    fi
+    ;;
   esac
 }
 
 # Get shell profile path based on detected shell
 get_shell_profile() {
   local shell_type="$1"
-  
+
   case "$shell_type" in
-    zsh)
-      echo "$HOME/.zshrc"
-      ;;
-    bash)
-      # Check for existing bash profile files, prefer .bash_profile on macOS
-      if [[ -f "$HOME/.bash_profile" ]]; then
-        echo "$HOME/.bash_profile"
-      elif [[ -f "$HOME/.bashrc" ]]; then
-        echo "$HOME/.bashrc"
-      else
-        echo "$HOME/.bash_profile"  # Create .bash_profile as default on macOS
-      fi
-      ;;
-    *)
-      echo "$HOME/.profile"  # Generic fallback
-      ;;
+  zsh)
+    echo "$HOME/.zshrc"
+    ;;
+  bash)
+    # Check for existing bash profile files, prefer .bash_profile on macOS
+    if [[ -f "$HOME/.bash_profile" ]]; then
+      echo "$HOME/.bash_profile"
+    elif [[ -f "$HOME/.bashrc" ]]; then
+      echo "$HOME/.bashrc"
+    else
+      echo "$HOME/.bash_profile" # Create .bash_profile as default on macOS
+    fi
+    ;;
+  *)
+    echo "$HOME/.profile" # Generic fallback
+    ;;
   esac
+}
+
+# Mark that shell profile was modified
+source_shell_profile() {
+  shell_profile_modified=true
 }
 
 # Install prerequisites (Xcode CLT and Homebrew)
@@ -295,7 +303,7 @@ setup_global_command() {
   # Create symlink to revenue script
   local symlink_path="$local_bin_dir/revenue"
   local script_path="$repo_dir/revenue"
-  
+
   if [[ -L "$symlink_path" ]]; then
     rm "$symlink_path"
   elif [[ -f "$symlink_path" ]]; then
@@ -316,12 +324,12 @@ setup_global_command() {
     shell_type=$(detect_shell)
     local profile_path
     profile_path=$(get_shell_profile "$shell_type")
-    
+
     print_info "Adding $HOME/.local/bin to PATH in $(basename "$profile_path")"
-    
+
     # Create the file if it doesn't exist
     touch "$profile_path"
-    
+
     # Check if PATH export already exists (but isn't active in current session)
     if ! grep -q "export PATH.*\.local/bin" "$profile_path"; then
       # Add PATH export
@@ -330,9 +338,9 @@ setup_global_command() {
         echo "# Add ~/.local/bin to PATH"
         echo "export PATH=\"\$HOME/.local/bin:\$PATH\""
       } >>"$profile_path"
-      
+
       print_success "Added ~/.local/bin to PATH in $(basename "$profile_path")"
-      print_info "Restart your terminal or run: source $profile_path"
+      source_shell_profile
     else
       print_success "~/.local/bin PATH export already exists in $(basename "$profile_path")"
     fi
@@ -377,7 +385,7 @@ configure_mise() {
     } >>"$profile_path"
 
     print_success "Added mise activation to $(basename "$profile_path")"
-    print_info "Restart your terminal or run: source $profile_path"
+    source_shell_profile
   fi
 
   # Trust the repository's .mise.toml to avoid warning messages
@@ -395,7 +403,7 @@ configure_mise() {
 run_installer() {
   print_info "Installing development tools..."
   echo ""
-  
+
   install_prerequisites
   install_brewfile_dependencies
   install_amp_cli
@@ -408,17 +416,25 @@ main() {
   print_header
   check_macos
   check_git
-  
+
   # Check GitHub access before attempting to clone
   if ! check_github_access; then
     exit 1
   fi
-  
+
   setup_repository
   run_installer
-  
+
   echo ""
   print_success "Setup complete!"
+
+  # Show terminal restart message if shell profile was modified
+  if [[ "$shell_profile_modified" == true ]]; then
+    echo ""
+    print_info "IMPORTANT: Close and reopen your terminal to activate the new configuration"
+    echo ""
+  fi
+
   print_info "You can now use the 'revenue' command to manage your workstation and demos."
   print_info "Try: revenue demo list"
   echo ""

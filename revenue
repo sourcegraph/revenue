@@ -300,7 +300,7 @@ configure_mise() {
     } >>"$profile_path"
 
     print_success "Added mise activation to $(basename "$profile_path")"
-    print_info "Restart your terminal or run: source $profile_path"
+    print_info "Close and reopen your terminal to activate the configuration"
   fi
 }
 
