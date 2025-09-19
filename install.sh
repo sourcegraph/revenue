@@ -317,10 +317,25 @@ setup_global_command() {
     local profile_path
     profile_path=$(get_shell_profile "$shell_type")
     
-    print_warning "$HOME/.local/bin is not in your PATH"
-    print_info "Add this line to your shell profile ($(basename "$profile_path")):"
-    echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
-    print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> $profile_path"
+    print_info "Adding $HOME/.local/bin to PATH in $(basename "$profile_path")"
+    
+    # Create the file if it doesn't exist
+    touch "$profile_path"
+    
+    # Check if PATH export already exists (but isn't active in current session)
+    if ! grep -q "export PATH.*\.local/bin" "$profile_path"; then
+      # Add PATH export
+      {
+        echo ""
+        echo "# Add ~/.local/bin to PATH"
+        echo "export PATH=\"\$HOME/.local/bin:\$PATH\""
+      } >>"$profile_path"
+      
+      print_success "Added ~/.local/bin to PATH in $(basename "$profile_path")"
+      print_info "Restart your terminal or run: source $profile_path"
+    else
+      print_success "~/.local/bin PATH export already exists in $(basename "$profile_path")"
+    fi
   else
     print_success "$HOME/.local/bin is already in your PATH"
   fi
