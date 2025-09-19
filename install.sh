@@ -433,10 +433,15 @@ main() {
     echo ""
     print_info "IMPORTANT: Close and reopen your terminal to activate the new configuration"
     echo ""
+    print_info "Once you've relaunched your terminal, you can now use the 'revenue' command to manage demo applications."
+    print_info "It is recommended that you use the newly installed Ghostty terminal instead of the built-in macOS Terminal.app for a better Amp experience"
+  else
+    print_info "You can now use the 'revenue' command to manage demo applications."
+    print_info "Try: revenue demo list"
   fi
 
-  print_info "You can now use the 'revenue' command to manage your workstation and demos."
-  print_info "Try: revenue demo list"
+  print_info "It is recommended that you use the newly installed Ghostty terminal instead of the built-in macOS Terminal.app for a better Amp experience"
+
   echo ""
 }
 
