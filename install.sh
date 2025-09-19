@@ -438,10 +438,8 @@ main() {
   else
     print_info "You can now use the 'revenue' command to manage demo applications."
     print_info "Try: revenue demo list"
+    print_info "It is recommended that you use the newly installed Ghostty terminal instead of the built-in macOS Terminal.app for a better Amp experience"
   fi
-
-  print_info "It is recommended that you use the newly installed Ghostty terminal instead of the built-in macOS Terminal.app for a better Amp experience"
-
   echo ""
 }
 
