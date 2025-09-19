@@ -321,13 +321,19 @@ update_repository() {
 
 # Initialize development environment
 init_environment() {
-  check_macos
-  install_prerequisites
-  install_brewfile_dependencies
-  install_amp_cli
-  setup_global_command
-  configure_mise
-  print_success "Environment initialization completed!"
+  print_info "Delegating to bootstrap installer for complete setup..."
+  echo ""
+  
+  # Use the consolidated installer
+  local installer_url="https://raw.githubusercontent.com/sourcegraph/revenue/main/install.sh"
+  if curl -fsSL "$installer_url" | bash; then
+    print_success "Environment initialization completed!"
+  else
+    print_error "Installation failed"
+    print_info "You can also run the installer directly:"
+    print_info "  curl -fsSL $installer_url | bash"
+    exit 1
+  fi
 }
 
 # Update development environment

@@ -65,7 +65,7 @@ check_git() {
 
 # Clone or update the repository
 setup_repository() {
-  local repo_dir="$HOME/revenue"
+  repo_dir="$HOME/revenue"  # Make repo_dir global for use by other functions
   local repo_url="https://github.com/sourcegraph/revenue.git"
   
   if [[ -d "$repo_dir" ]]; then
@@ -105,17 +105,219 @@ setup_repository() {
   fi
 }
 
-# Run the main installer
-run_installer() {
-  print_info "Running workstation setup..."
-  echo ""
+# Function to check if command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Detect user's current shell
+detect_shell() {
+  local current_shell
+  current_shell=$(basename "$SHELL" 2>/dev/null || echo "unknown")
   
-  if [[ -x "./revenue" ]]; then
-    ./revenue init
+  case "$current_shell" in
+    zsh|bash)
+      echo "$current_shell"
+      ;;
+    *)
+      # Fallback: check what shell is actually running this script
+      if [[ -n "$ZSH_VERSION" ]]; then
+        echo "zsh"
+      elif [[ -n "$BASH_VERSION" ]]; then
+        echo "bash"
+      else
+        # Default to zsh since it's macOS default since 10.15
+        echo "zsh"
+      fi
+      ;;
+  esac
+}
+
+# Get shell profile path based on detected shell
+get_shell_profile() {
+  local shell_type="$1"
+  
+  case "$shell_type" in
+    zsh)
+      echo "$HOME/.zshrc"
+      ;;
+    bash)
+      # Check for existing bash profile files, prefer .bash_profile on macOS
+      if [[ -f "$HOME/.bash_profile" ]]; then
+        echo "$HOME/.bash_profile"
+      elif [[ -f "$HOME/.bashrc" ]]; then
+        echo "$HOME/.bashrc"
+      else
+        echo "$HOME/.bash_profile"  # Create .bash_profile as default on macOS
+      fi
+      ;;
+    *)
+      echo "$HOME/.profile"  # Generic fallback
+      ;;
+  esac
+}
+
+# Install prerequisites (Xcode CLT and Homebrew)
+install_prerequisites() {
+  # Check if Xcode Command Line Tools are installed
+  if ! command_exists "git"; then
+    print_info "Installing Xcode Command Line Tools..."
+    xcode-select --install
+    print_warning "Please complete the Xcode Command Line Tools installation and run this script again."
+    exit 0
   else
-    print_error "Revenue script not found or not executable"
+    print_success "Xcode Command Line Tools are already installed"
+  fi
+
+  # Install Homebrew if needed
+  if ! command_exists "brew"; then
+    print_info "Installing Homebrew..."
+    print_info "You may be prompted for your macOS password..."
+    if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+      print_success "Homebrew installed successfully"
+
+      # Add Homebrew to PATH for current session
+      if [[ -f "/opt/homebrew/bin/brew" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      elif [[ -f "/usr/local/bin/brew" ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+    else
+      print_error "Failed to install Homebrew"
+      exit 1
+    fi
+  else
+    print_success "Homebrew is already installed"
+  fi
+}
+
+# Install dependencies via Brewfile
+install_brewfile_dependencies() {
+  cd "$repo_dir"
+  print_info "Installing development tools and applications..."
+  if brew bundle install --quiet; then
+    print_success "Development tools installed successfully"
+  else
+    print_error "Failed to install development tools"
     exit 1
   fi
+}
+
+# Install Amp CLI
+install_amp_cli() {
+  if ! command_exists "amp"; then
+    print_info "Installing Amp CLI..."
+    if curl -fsSL https://ampcode.com/install.sh | bash; then
+      print_success "Amp CLI installed successfully"
+    else
+      print_error "Failed to install Amp CLI"
+      exit 1
+    fi
+  else
+    print_success "Amp CLI is already installed"
+  fi
+}
+
+# Setup global revenue command
+setup_global_command() {
+  # Create ~/.local/bin if it doesn't exist
+  local local_bin_dir="$HOME/.local/bin"
+  if [[ ! -d "$local_bin_dir" ]]; then
+    mkdir -p "$local_bin_dir"
+    print_success "Created $local_bin_dir directory"
+  fi
+
+  # Remove old revenue-setup symlink if it exists
+  local old_symlink_path="$local_bin_dir/revenue-setup"
+  if [[ -L "$old_symlink_path" || -f "$old_symlink_path" ]]; then
+    rm "$old_symlink_path"
+    print_success "Removed old revenue-setup symlink"
+  fi
+
+  # Create symlink to revenue script
+  local symlink_path="$local_bin_dir/revenue"
+  local script_path="$repo_dir/revenue"
+  
+  if [[ -L "$symlink_path" ]]; then
+    rm "$symlink_path"
+  elif [[ -f "$symlink_path" ]]; then
+    print_warning "File exists at $symlink_path, removing..."
+    rm "$symlink_path"
+  fi
+
+  if ln -s "$script_path" "$symlink_path"; then
+    print_success "Created global command: revenue"
+  else
+    print_error "Failed to create global revenue command"
+    exit 1
+  fi
+
+  # Check if ~/.local/bin is in PATH
+  if [[ ":$PATH:" != *":$local_bin_dir:"* ]]; then
+    local shell_type
+    shell_type=$(detect_shell)
+    local profile_path
+    profile_path=$(get_shell_profile "$shell_type")
+    
+    print_warning "$HOME/.local/bin is not in your PATH"
+    print_info "Add this line to your shell profile ($(basename "$profile_path")):"
+    echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+    print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> $profile_path"
+  else
+    print_success "$HOME/.local/bin is already in your PATH"
+  fi
+}
+
+# Configure mise shell integration
+configure_mise() {
+  local shell_type
+  shell_type=$(detect_shell)
+  local profile_path
+  profile_path=$(get_shell_profile "$shell_type")
+  local mise_activation="eval \"\$(mise activate $shell_type)\""
+  local profile_updated=false
+
+  print_info "Detected shell: $shell_type"
+  print_info "Using profile: $(basename "$profile_path")"
+
+  # Check if mise activation is already configured
+  if [[ -f "$profile_path" ]] && grep -q "mise activate $shell_type" "$profile_path"; then
+    print_success "mise activation already configured in $(basename "$profile_path")"
+    profile_updated=true
+  fi
+
+  # Also check for any existing mise activation (different shell) and warn
+  if [[ -f "$profile_path" ]] && grep -q "mise activate" "$profile_path" && ! grep -q "mise activate $shell_type" "$profile_path"; then
+    print_warning "Found mise activation for different shell in $(basename "$profile_path")"
+    print_info "This will be updated to use $shell_type"
+  fi
+
+  if [[ "$profile_updated" == false ]]; then
+    # Create the file if it doesn't exist
+    touch "$profile_path"
+
+    # Add mise activation
+    {
+      echo ""
+      echo "# Initialize mise"
+      echo "$mise_activation"
+    } >>"$profile_path"
+
+    print_success "Added mise activation to $(basename "$profile_path")"
+    print_info "Restart your terminal or run: source $profile_path"
+  fi
+}
+
+# Run the main installer
+run_installer() {
+  print_info "Installing development tools..."
+  echo ""
+  
+  install_prerequisites
+  install_brewfile_dependencies
+  install_amp_cli
+  setup_global_command
+  configure_mise
 }
 
 # Main installation flow
