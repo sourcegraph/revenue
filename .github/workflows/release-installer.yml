@@ -24,7 +24,7 @@ jobs:
         echo "version=v$(date +%Y.%m.%d).$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       
     - name: Create or update release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.vars.outputs.version }}
         name: "Revenue Installer ${{ steps.vars.outputs.version }}"
@@ -52,7 +52,4 @@ jobs:
         files: |
           install.sh
         prerelease: false
-        make_latest: true
         generate_release_notes: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
