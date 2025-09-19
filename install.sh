@@ -31,8 +31,8 @@ print_error() {
 
 print_header() {
   echo ""
-  echo "🚀 Sourcegraph Revenue Team Workstation Setup"
-  echo "============================================="
+  echo "Sourcegraph Revenue Team Workstation Setup"
+  echo "=========================================="
   echo ""
   print_info "This will set up your macOS workstation with all the tools needed for demos and development."
   print_info "Estimated time: 15-30 minutes (depending on internet speed)"
@@ -87,15 +87,15 @@ check_github_access() {
   echo ""
   print_info "Please choose one of these authentication methods:"
   echo ""
-  echo "1. 📱 GitHub CLI (Recommended):"
+  echo "1. GitHub CLI (Recommended):"
   print_info "   Install: brew install gh"  
   print_info "   Login:   gh auth login"
   echo ""
-  echo "2. 🔐 SSH Key:"
+  echo "2. SSH Key:"
   print_info "   Generate: ssh-keygen -t ed25519 -C \"your_email@example.com\""
   print_info "   Add to GitHub: https://github.com/settings/keys"
   echo ""
-  echo "3. 🌐 Personal Access Token:"
+  echo "3. Personal Access Token:"
   print_info "   Create: https://github.com/settings/tokens"
   print_info "   Configure: git config --global github.token YOUR_TOKEN"
   echo ""
@@ -124,8 +124,14 @@ setup_repository() {
       # Update repository
       git fetch origin >/dev/null 2>&1
       if [[ "$current_branch" == "main" ]]; then
-        git pull origin main >/dev/null 2>&1
-        print_success "Updated to latest version"
+        # Check if working directory is clean
+        if git diff-index --quiet HEAD -- 2>/dev/null; then
+          git pull origin main >/dev/null 2>&1
+          print_success "Updated to latest version"
+        else
+          print_warning "Repository has uncommitted changes, skipping update"
+          print_info "Using current version for installation"
+        fi
       else
         print_warning "Repository is on branch '$current_branch', not 'main'"
         print_info "Consider switching to main for latest updates"
@@ -397,7 +403,7 @@ main() {
   run_installer
   
   echo ""
-  print_success "🎉 Setup complete!"
+  print_success "Setup complete!"
   print_info "You can now use the 'revenue' command to manage your workstation and demos."
   print_info "Try: revenue demo list"
   echo ""

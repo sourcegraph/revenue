@@ -324,15 +324,28 @@ init_environment() {
   print_info "Delegating to bootstrap installer for complete setup..."
   echo ""
   
-  # Use the consolidated installer
+  # Use local install.sh if available, otherwise download it
+  local local_installer="$SCRIPT_DIR/install.sh"
   local installer_url="https://raw.githubusercontent.com/sourcegraph/revenue/main/install.sh"
-  if curl -fsSL "$installer_url" | bash; then
-    print_success "Environment initialization completed!"
+  
+  if [[ -f "$local_installer" ]]; then
+    print_info "Using local installer..."
+    if bash "$local_installer"; then
+      print_success "Environment initialization completed!"
+    else
+      print_error "Local installation failed"
+      exit 1
+    fi
   else
-    print_error "Installation failed"
-    print_info "You can also run the installer directly:"
-    print_info "  curl -fsSL $installer_url | bash"
-    exit 1
+    print_info "Downloading installer from repository..."
+    if curl -fsSL "$installer_url" | bash; then
+      print_success "Environment initialization completed!"
+    else
+      print_error "Installation failed"
+      print_info "You can also run the installer directly:"
+      print_info "  curl -fsSL $installer_url | bash"
+      exit 1
+    fi
   fi
 }
 

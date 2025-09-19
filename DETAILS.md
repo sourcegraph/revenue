@@ -1,7 +1,7 @@
 # Revenue Team Application Manifest
 
 This list is everything that will be installed on your workstation when running
-`revenue init`. All dependencies are managed via [Brewfile](/Brewfile).
+the installer. All dependencies are managed via [Brewfile](/Brewfile).
 
 To update existing installed tools, run `revenue update`
 

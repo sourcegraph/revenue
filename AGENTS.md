@@ -2,7 +2,8 @@
 
 ## Build/Test Commands
 
-- `./revenue init` - Initialize workstation with development tools
+- `./install.sh` - Initialize workstation with development tools (bootstrap)
+- `./revenue init` - Initialize workstation (alternative method)
 - `./revenue update` - Update existing tools and packages  
 - `./revenue help` - Show usage help
 - `revenue init|update|demo` - Global command after setup
