@@ -89,11 +89,16 @@ execute_demo_config() {
   fi
 
   # Parse config values
-  local language=$(mise exec -- yq '.language // "unknown"' "$config_file")
-  local framework=$(mise exec -- yq '.framework // "unknown"' "$config_file")
-  local port=$(mise exec -- yq '.port // ""' "$config_file")
-  local install_cmd=$(mise exec -- yq '.install // ""' "$config_file")
-  local start_cmd=$(mise exec -- yq '.start' "$config_file")
+  local language
+  language=$(mise exec -- yq '.language // "unknown"' "$config_file")
+  local framework
+  framework=$(mise exec -- yq '.framework // "unknown"' "$config_file")
+  local port
+  port=$(mise exec -- yq '.port // ""' "$config_file")
+  local install_cmd
+  install_cmd=$(mise exec -- yq '.install // ""' "$config_file")
+  local start_cmd
+  start_cmd=$(mise exec -- yq '.start' "$config_file")
 
   if [[ "$start_cmd" == "null" || -z "$start_cmd" ]]; then
     print_error "No 'start' command found in $config_file"
@@ -129,7 +134,8 @@ start_app() {
     return 1
   fi
 
-  local session_name=$(get_session_name "$language" "$framework")
+  local session_name
+  session_name=$(get_session_name "$language" "$framework")
   local app_dir="$language/$framework"
 
   # Prepare the demo environment
@@ -140,7 +146,8 @@ start_app() {
   # Check if session already exists
   if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
     local config_file="$app_dir/demo.yaml"
-    local port=$(mise exec -- yq '.port // ""' "$config_file")
+    local port
+    port=$(mise exec -- yq '.port // ""' "$config_file")
     print_warning "Demo $language/$framework is already running in session: $session_name"
     if [[ -n "$port" && "$port" != "null" ]]; then
       print_info "Application available at: http://localhost:$port"
@@ -150,13 +157,14 @@ start_app() {
 
   # Get the port info for display
   local config_file="$app_dir/demo.yaml"
-  local port=$(mise exec -- yq '.port // ""' "$config_file")
+  local port
+  port=$(mise exec -- yq '.port // ""' "$config_file")
 
   print_info "Starting $language/$framework demo..."
 
   # Get the command sequence from the YAML config
-  local demo_command=$(execute_demo_config "$app_dir")
-  if [[ $? -ne 0 ]]; then
+  local demo_command
+  if ! demo_command=$(execute_demo_config "$app_dir"); then
     return 1
   fi
 
@@ -180,7 +188,8 @@ start_app() {
 
 # Start all demo applications
 start_all() {
-  local apps=($(discover_apps))
+  local apps
+  mapfile -t apps < <(discover_apps)
 
   if [[ ${#apps[@]} -eq 0 ]]; then
     print_warning "No demo applications found"
@@ -217,7 +226,8 @@ stop_app() {
     return 1
   fi
 
-  local session_name=$(get_session_name "$language" "$framework")
+  local session_name
+  session_name=$(get_session_name "$language" "$framework")
 
   if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
     tmux -L "$TMUX_SERVER" kill-session -t "$session_name"
@@ -229,7 +239,8 @@ stop_app() {
 
 # Stop all demo applications
 stop_all() {
-  local sessions=$(tmux -L "$TMUX_SERVER" list-sessions -F "#{session_name}" 2>/dev/null || true)
+  local sessions
+  sessions=$(tmux -L "$TMUX_SERVER" list-sessions -F "#{session_name}" 2>/dev/null || true)
 
   if [[ -z "$sessions" ]]; then
     print_info "No demo applications are currently running"
@@ -271,7 +282,8 @@ clean_demos() {
 list_demos() {
   print_info "Available demo applications:"
   discover_apps | while IFS=':' read -r language framework; do
-    local session_name=$(get_session_name "$language" "$framework")
+    local session_name
+    session_name=$(get_session_name "$language" "$framework")
     local status="stopped"
     if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
       status="running"
@@ -290,7 +302,8 @@ logs_app() {
     return 1
   fi
 
-  local session_name=$(get_session_name "$language" "$framework")
+  local session_name
+  session_name=$(get_session_name "$language" "$framework")
 
   if ! tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
     print_error "$language/$framework demo is not running"
@@ -317,7 +330,8 @@ attach_app() {
     return 1
   fi
 
-  local session_name=$(get_session_name "$language" "$framework")
+  local session_name
+  session_name=$(get_session_name "$language" "$framework")
 
   if ! tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
     print_error "$language/$framework demo is not running"
@@ -330,7 +344,8 @@ attach_app() {
 
 # List running demos
 list_running() {
-  local sessions=$(tmux -L "$TMUX_SERVER" list-sessions -F "#{session_name}" 2>/dev/null || true)
+  local sessions
+  sessions=$(tmux -L "$TMUX_SERVER" list-sessions -F "#{session_name}" 2>/dev/null || true)
 
   if [[ -z "$sessions" ]]; then
     print_info "No demo applications are currently running"
