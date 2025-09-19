@@ -286,7 +286,7 @@ install_amp_cli() {
 
 # Setup global revenue command
 setup_global_command() {
-  # Create ~/.local/bin if it doesn't exist
+  # Create $HOME/.local/bin if it doesn't exist
   local local_bin_dir="$HOME/.local/bin"
   if [[ ! -d "$local_bin_dir" ]]; then
     mkdir -p "$local_bin_dir"
@@ -318,7 +318,7 @@ setup_global_command() {
     exit 1
   fi
 
-  # Check if ~/.local/bin is in PATH
+  # Check if $HOME/.local/bin is in PATH
   if [[ ":$PATH:" != *":$local_bin_dir:"* ]]; then
     local shell_type
     shell_type=$(detect_shell)
@@ -335,14 +335,14 @@ setup_global_command() {
       # Add PATH export
       {
         echo ""
-        echo "# Add ~/.local/bin to PATH"
+        echo "# Add $HOME/.local/bin to PATH"
         echo "export PATH=\"\$HOME/.local/bin:\$PATH\""
       } >>"$profile_path"
 
-      print_success "Added ~/.local/bin to PATH in $(basename "$profile_path")"
+      print_success "Added $HOME/.local/bin to PATH in $(basename "$profile_path")"
       source_shell_profile
     else
-      print_success "~/.local/bin PATH export already exists in $(basename "$profile_path")"
+      print_success "$HOME/.local/bin PATH export already exists in $(basename "$profile_path")"
     fi
   else
     print_success "$HOME/.local/bin is already in your PATH"
