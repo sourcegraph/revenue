@@ -4,9 +4,14 @@
 
 set -e # Exit on any error
 
-# Get the real script directory (resolving symlinks)
-SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+# Get the real script directory (resolving symlinks) - macOS compatible
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
 # Colors for output
 RED='\033[0;31m'
@@ -198,48 +203,104 @@ setup_global_command() {
 
   # Check if ~/.local/bin is in PATH
   if [[ ":$PATH:" != *":$local_bin_dir:"* ]]; then
+    local shell_type
+    shell_type=$(detect_shell)
+    local profile_path
+    profile_path=$(get_shell_profile "$shell_type")
+    
     print_warning "$HOME/.local/bin is not in your PATH"
-    print_info "Add this line to your shell profile (~/.zshrc or ~/.bash_profile):"
+    print_info "Add this line to your shell profile ($(basename "$profile_path")):"
     echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
-    print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
+    print_info "Or run: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> $profile_path"
   else
     print_success "$HOME/.local/bin is already in your PATH"
   fi
 }
 
+# Detect user's current shell
+detect_shell() {
+  local current_shell
+  current_shell=$(basename "$SHELL" 2>/dev/null || echo "unknown")
+  
+  case "$current_shell" in
+    zsh|bash)
+      echo "$current_shell"
+      ;;
+    *)
+      # Fallback: check what shell is actually running this script
+      if [[ -n "$ZSH_VERSION" ]]; then
+        echo "zsh"
+      elif [[ -n "$BASH_VERSION" ]]; then
+        echo "bash"
+      else
+        # Default to zsh since it's macOS default since 10.15
+        echo "zsh"
+      fi
+      ;;
+  esac
+}
+
+# Get shell profile path based on detected shell
+get_shell_profile() {
+  local shell_type="$1"
+  
+  case "$shell_type" in
+    zsh)
+      echo "$HOME/.zshrc"
+      ;;
+    bash)
+      # Check for existing bash profile files, prefer .bash_profile on macOS
+      if [[ -f "$HOME/.bash_profile" ]]; then
+        echo "$HOME/.bash_profile"
+      elif [[ -f "$HOME/.bashrc" ]]; then
+        echo "$HOME/.bashrc"
+      else
+        echo "$HOME/.bash_profile"  # Create .bash_profile as default on macOS
+      fi
+      ;;
+    *)
+      echo "$HOME/.profile"  # Generic fallback
+      ;;
+  esac
+}
+
 # Configure mise shell integration
 configure_mise() {
-  # Check common bash profile files on macOS
-  local bash_profiles=("$HOME/.bashrc" "$HOME/.bash_profile")
-  local mise_activation="eval \"\$(mise activate bash)\""
+  local shell_type
+  shell_type=$(detect_shell)
+  local profile_path
+  profile_path=$(get_shell_profile "$shell_type")
+  local mise_activation="eval \"\$(mise activate $shell_type)\""
   local profile_updated=false
 
-  for profile in "${bash_profiles[@]}"; do
-    if [[ -f "$profile" ]]; then
-      if grep -q "mise activate bash" "$profile"; then
-        print_success "mise activation already configured in $(basename "$profile")"
-        profile_updated=true
-        break
-      fi
-    fi
-  done
+  print_info "Detected shell: $shell_type"
+  print_info "Using profile: $(basename "$profile_path")"
+
+  # Check if mise activation is already configured
+  if [[ -f "$profile_path" ]] && grep -q "mise activate $shell_type" "$profile_path"; then
+    print_success "mise activation already configured in $(basename "$profile_path")"
+    profile_updated=true
+  fi
+
+  # Also check for any existing mise activation (different shell) and warn
+  if [[ -f "$profile_path" ]] && grep -q "mise activate" "$profile_path" && ! grep -q "mise activate $shell_type" "$profile_path"; then
+    print_warning "Found mise activation for different shell in $(basename "$profile_path")"
+    print_info "This will be updated to use $shell_type"
+  fi
 
   if [[ "$profile_updated" == false ]]; then
-    # Use .bash_profile on macOS as it's more standard
-    local target_profile="$HOME/.bash_profile"
-
     # Create the file if it doesn't exist
-    touch "$target_profile"
+    touch "$profile_path"
 
     # Add mise activation
     {
       echo ""
       echo "# Initialize mise"
       echo "$mise_activation"
-    } >>"$target_profile"
+    } >>"$profile_path"
 
-    print_success "Added mise activation to $(basename "$target_profile")"
-    print_info "Restart your terminal or run: source $target_profile"
+    print_success "Added mise activation to $(basename "$profile_path")"
+    print_info "Restart your terminal or run: source $profile_path"
   fi
 }
 
