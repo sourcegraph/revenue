@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# setup.sh - Sourcegraph Revenue team workstation setup
+# revenue - Sourcegraph Revenue team workstation setup
 
 set -e # Exit on any error
 
@@ -48,13 +48,13 @@ check_macos() {
 # Function to show help menu
 show_help() {
   cat <<EOF
-setup.sh - Sourcegraph Revenue Team Workstation Setup
+revenue - Sourcegraph Revenue Team Workstation Setup
 
 DESCRIPTION:
     This utility will setup your environment and ensure you have the necessary tools to both demo and use Amp.
 
 USAGE:
-    ./setup.sh [COMMAND]
+    revenue [COMMAND]
 
 COMMANDS:
     init        Initialize your workstation
@@ -66,10 +66,10 @@ COMMANDS:
     help        Show this help message
 
 EXAMPLES:
-    ./setup.sh init
-    ./setup.sh update
-    ./setup.sh demo start python flask
-    ./setup.sh help
+    revenue init
+    revenue update
+    revenue demo start python flask
+    revenue help
 
 For more information, visit: https://github.com/sourcegraph/revenue
 EOF
@@ -168,7 +168,7 @@ update_amp_cli() {
 setup_global_command() {
   # Get the absolute path of this script
   local script_path
-  script_path="$(realpath "$SCRIPT_DIR/setup.sh")"
+  script_path="$(realpath "$SCRIPT_DIR/revenue")"
 
   # Create ~/.local/bin if it doesn't exist
   local local_bin_dir="$HOME/.local/bin"
@@ -291,10 +291,10 @@ main() {
     update_environment
     ;;
   "demo")
-    # Delegate to amp_demos/demo.sh with remaining arguments
+    # Delegate to amp_demos/demo with remaining arguments
     shift # Remove 'demo' from arguments
     cd "$SCRIPT_DIR/amp_demos"
-    exec "./demo.sh" "$@"
+    exec "./demo" "$@"
     ;;
   "help" | "-h" | "--help")
     show_help

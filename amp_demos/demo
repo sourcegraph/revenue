@@ -81,41 +81,41 @@ prepare_demo_environment() {
 execute_demo_config() {
   local app_dir="$1"
   local config_file="$app_dir/demo.yaml"
-  
+
   # Check if yq is available through mise
   if ! mise exec -- command -v yq &>/dev/null; then
     print_error "yq is required but not installed. Run 'mise install' in the root directory."
     return 1
   fi
-  
+
   # Parse config values
   local language=$(mise exec -- yq '.language // "unknown"' "$config_file")
-  local framework=$(mise exec -- yq '.framework // "unknown"' "$config_file") 
+  local framework=$(mise exec -- yq '.framework // "unknown"' "$config_file")
   local port=$(mise exec -- yq '.port // ""' "$config_file")
   local install_cmd=$(mise exec -- yq '.install // ""' "$config_file")
   local start_cmd=$(mise exec -- yq '.start' "$config_file")
-  
+
   if [[ "$start_cmd" == "null" || -z "$start_cmd" ]]; then
     print_error "No 'start' command found in $config_file"
     return 1
   fi
-  
+
   # Build command sequence
   local full_cmd=""
-  
+
   # Add install command if present
   if [[ -n "$install_cmd" && "$install_cmd" != "null" ]]; then
     print_info "Installing dependencies for $language/$framework..."
     full_cmd="echo 'Installing dependencies...' && $install_cmd && "
   fi
-  
+
   # Add start command with announcement
   if [[ -n "$port" && "$port" != "null" ]]; then
     full_cmd="${full_cmd}echo 'Starting $language/$framework demo...' && echo 'Application will be available at: http://localhost:$port' && echo '' && $start_cmd"
   else
     full_cmd="${full_cmd}echo 'Starting $language/$framework demo...' && echo '' && $start_cmd"
   fi
-  
+
   echo "$full_cmd"
 }
 
@@ -125,7 +125,7 @@ start_app() {
   local framework="$2"
 
   if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo.sh start <language> <framework>"
+    print_error "Usage: demo start <language> <framework>"
     return 1
   fi
 
@@ -151,15 +151,15 @@ start_app() {
   # Get the port info for display
   local config_file="$app_dir/demo.yaml"
   local port=$(mise exec -- yq '.port // ""' "$config_file")
-  
+
   print_info "Starting $language/$framework demo..."
-  
+
   # Get the command sequence from the YAML config
   local demo_command=$(execute_demo_config "$app_dir")
   if [[ $? -ne 0 ]]; then
     return 1
   fi
-  
+
   # Start tmux session in the demo directory with mise environment and execute the command
   tmux -L "$TMUX_SERVER" new-session -d -s "$session_name" -c "$(pwd)/$app_dir" "mise exec -- bash -c \"$demo_command\""
 
@@ -181,26 +181,26 @@ start_app() {
 # Start all demo applications
 start_all() {
   local apps=($(discover_apps))
-  
+
   if [[ ${#apps[@]} -eq 0 ]]; then
     print_warning "No demo applications found"
     return 0
   fi
-  
+
   print_info "Starting all demo applications..."
   local started=0
   local failed=0
-  
+
   for app in "${apps[@]}"; do
-    IFS=':' read -r language framework <<< "$app"
-    
+    IFS=':' read -r language framework <<<"$app"
+
     if start_app "$language" "$framework"; then
       ((started++))
     else
       ((failed++))
     fi
   done
-  
+
   print_success "Started $started demo applications"
   if [[ $failed -gt 0 ]]; then
     print_warning "$failed demo applications failed to start"
@@ -213,7 +213,7 @@ stop_app() {
   local framework="$2"
 
   if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo.sh stop <language> <framework>"
+    print_error "Usage: demo stop <language> <framework>"
     return 1
   fi
 
@@ -251,7 +251,7 @@ clean_demos() {
 
   if [[ "$confirm_flag" != "--confirm" ]]; then
     print_error "This will reset all changes in the demo directory!"
-    print_error "Use: demo.sh clean --confirm"
+    print_error "Use: demo clean --confirm"
     return 1
   fi
 
@@ -286,7 +286,7 @@ logs_app() {
   local framework="$2"
 
   if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo.sh logs <language> <framework>"
+    print_error "Usage: demo logs <language> <framework>"
     return 1
   fi
 
@@ -299,10 +299,10 @@ logs_app() {
 
   print_info "Current output from $language/$framework demo:"
   echo ""
-  
+
   # Capture and display the current pane content
   tmux -L "$TMUX_SERVER" capture-pane -t "$session_name" -p
-  
+
   echo ""
   print_info "Use 'revenue demo attach $language $framework' to interact with the session"
 }
@@ -313,7 +313,7 @@ attach_app() {
   local framework="$2"
 
   if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo.sh attach <language> <framework>"
+    print_error "Usage: demo attach <language> <framework>"
     return 1
   fi
 
@@ -350,24 +350,24 @@ show_usage() {
   echo "Demo Application Manager"
   echo ""
   echo "Usage:"
-  echo "  demo.sh start <language> <framework>   Start a demo application"
-  echo "  demo.sh start all                      Start all demo applications"
-  echo "  demo.sh stop <language> <framework>    Stop a demo application"
-  echo "  demo.sh stop all                       Stop all demo applications"
-  echo "  demo.sh logs <language> <framework>    View logs from a running demo"
-  echo "  demo.sh attach <language> <framework>  Attach to a running demo session"
-  echo "  demo.sh list                           List all available demos"
-  echo "  demo.sh running                        List running demos"
-  echo "  demo.sh clean --confirm                Reset demo directory"
-  echo "  demo.sh help                           Show this help"
+  echo "  demo start <language> <framework>   Start a demo application"
+  echo "  demo start all                      Start all demo applications"
+  echo "  demo stop <language> <framework>    Stop a demo application"
+  echo "  demo stop all                       Stop all demo applications"
+  echo "  demo logs <language> <framework>    View logs from a running demo"
+  echo "  demo attach <language> <framework>  Attach to a running demo session"
+  echo "  demo list                           List all available demos"
+  echo "  demo running                        List running demos"
+  echo "  demo clean --confirm                Reset demo directory"
+  echo "  demo help                           Show this help"
   echo ""
   echo "Examples:"
-  echo "  demo.sh start python flask"
-  echo "  demo.sh start all"
-  echo "  demo.sh stop javascript react"
-  echo "  demo.sh stop all"
-  echo "  demo.sh logs python flask"
-  echo "  demo.sh attach python flask"
+  echo "  demo start python flask"
+  echo "  demo start all"
+  echo "  demo stop javascript react"
+  echo "  demo stop all"
+  echo "  demo logs python flask"
+  echo "  demo attach python flask"
   echo ""
 }
 
