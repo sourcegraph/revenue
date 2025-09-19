@@ -188,8 +188,10 @@ start_app() {
 
 # Start all demo applications
 start_all() {
-  local apps
-  mapfile -t apps < <(discover_apps)
+  local apps=()
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && apps+=("$line")
+  done < <(discover_apps)
 
   if [[ ${#apps[@]} -eq 0 ]]; then
     print_warning "No demo applications found"
