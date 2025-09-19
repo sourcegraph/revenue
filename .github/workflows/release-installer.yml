@@ -1,0 +1,55 @@
+name: Release Installer
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'install.sh' ]
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Get short commit SHA
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+    - name: Create or update release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest
+        name: Latest Installer
+        body: |
+          🚀 **Revenue Team Workstation Installer**
+          
+          Public installer for the Sourcegraph Revenue team workstation setup.
+          
+          **Usage:**
+          ```bash
+          /bin/bash -c "$(curl -fsSL https://github.com/sourcegraph/revenue/releases/latest/download/install.sh)"
+          ```
+          
+          **What it does:**
+          - Sets up macOS development environment
+          - Installs VS Code, Python, Java, and other tools
+          - Configures demo applications
+          - Creates global `revenue` command
+          
+          **Requirements:**
+          - macOS (10.15+)
+          - GitHub access to sourcegraph/revenue repository
+          
+          Updated from commit: ${{ steps.vars.outputs.sha_short }}
+        files: |
+          install.sh
+        prerelease: false
+        make_latest: true
+        generate_release_notes: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

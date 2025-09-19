@@ -63,6 +63,49 @@ check_git() {
   print_success "Git is available"
 }
 
+# Check GitHub authentication
+check_github_access() {
+  local repo_url="https://github.com/sourcegraph/revenue.git"
+  local test_url="https://api.github.com/repos/sourcegraph/revenue"
+  
+  print_info "Checking GitHub access to private repository..."
+  
+  # First, try to access the repository API to check authentication
+  if curl -s -f -H "Authorization: token $(git config --get github.token 2>/dev/null || echo '')" "$test_url" >/dev/null 2>&1; then
+    print_success "GitHub access confirmed"
+    return 0
+  fi
+  
+  # If that fails, try a simple git ls-remote to test access
+  if git ls-remote "$repo_url" >/dev/null 2>&1; then
+    print_success "GitHub access confirmed"
+    return 0
+  fi
+  
+  # No access - provide authentication guidance
+  print_warning "GitHub authentication required for private repository access"
+  echo ""
+  print_info "Please choose one of these authentication methods:"
+  echo ""
+  echo "1. 📱 GitHub CLI (Recommended):"
+  print_info "   Install: brew install gh"  
+  print_info "   Login:   gh auth login"
+  echo ""
+  echo "2. 🔐 SSH Key:"
+  print_info "   Generate: ssh-keygen -t ed25519 -C \"your_email@example.com\""
+  print_info "   Add to GitHub: https://github.com/settings/keys"
+  echo ""
+  echo "3. 🌐 Personal Access Token:"
+  print_info "   Create: https://github.com/settings/tokens"
+  print_info "   Configure: git config --global github.token YOUR_TOKEN"
+  echo ""
+  print_info "After authentication, run this installer again."
+  print_info "Need repository access? Ask in #ask-tech-ops"
+  echo ""
+  
+  return 1
+}
+
 # Clone or update the repository
 setup_repository() {
   repo_dir="$HOME/revenue"  # Make repo_dir global for use by other functions
@@ -99,7 +142,16 @@ setup_repository() {
       cd "$repo_dir"
     else
       print_error "Failed to clone repository"
-      print_info "Please check your internet connection and GitHub access"
+      print_info "This might indicate:"
+      print_info "  • Network connectivity issues"
+      print_info "  • GitHub authentication problems" 
+      print_info "  • Missing repository access permissions"
+      echo ""
+      print_info "Solutions:"
+      print_info "  • Check your internet connection"
+      print_info "  • Verify GitHub authentication: gh auth status"
+      print_info "  • Request repository access in #ask-tech-ops"
+      echo ""
       exit 1
     fi
   fi
@@ -325,6 +377,12 @@ main() {
   print_header
   check_macos
   check_git
+  
+  # Check GitHub access before attempting to clone
+  if ! check_github_access; then
+    exit 1
+  fi
+  
   setup_repository
   run_installer
   
