@@ -9,7 +9,7 @@ The script expects demo applications to be organized as:
 
 ```
 amp_demos/
-├── demo.sh
+├── demo
 ├── <language>/
 │   └── <framework>/
 │       ├── demo.yaml        # Required configuration file
@@ -46,13 +46,13 @@ revenue demo stop <language> <framework>
 revenue demo list
 ```
 
-### Via setup.sh
+### Via revenue script
 
 ```bash
 # From the repository root
-./setup.sh demo start <language> <framework>
-./setup.sh demo stop <language> <framework>
-./setup.sh demo list
+./revenue demo start <language> <framework>
+./revenue demo stop <language> <framework>
+./revenue demo list
 ```
 
 ### Direct usage
@@ -60,41 +60,41 @@ revenue demo list
 ```bash
 # From amp_demos directory
 cd amp_demos
-./demo.sh start <language> <framework>
+./demo start <language> <framework>
 ```
 
 ### Start a Demo
 
 ```bash
-./demo.sh start <language> <framework>   # Start a specific demo
-./demo.sh start all                      # Start all available demos
+./demo start <language> <framework>   # Start a specific demo
+./demo start all                      # Start all available demos
 ```
 
 ### Stop a Demo
 
 ```bash
-./demo.sh stop <language> <framework>    # Stop a specific demo
-./demo.sh stop all                       # Stop all running demos
+./demo stop <language> <framework>    # Stop a specific demo
+./demo stop all                       # Stop all running demos
 ```
 
 ### View and Interact with Demos
 
 ```bash
-./demo.sh logs <language> <framework>    # View current logs from a running demo
-./demo.sh attach <language> <framework>  # Attach to a running demo session
+./demo logs <language> <framework>    # View current logs from a running demo
+./demo attach <language> <framework>  # Attach to a running demo session
 ```
 
 ### List Demos
 
 ```bash
-./demo.sh list                           # Show all available demos and their status
-./demo.sh running                        # Show only running demos
+./demo list                           # Show all available demos and their status
+./demo running                        # Show only running demos
 ```
 
 ### Clean Environment
 
 ```bash
-./demo.sh clean --confirm                # Reset git state and stop all demos
+./demo clean --confirm                # Reset git state and stop all demos
 ```
 
 ## How It Works
@@ -109,22 +109,22 @@ cd amp_demos
 
 ```bash
 # Start a Python Flask demo
-./demo.sh start python flask
+./demo start python flask
 
 # Start all available demos
-./demo.sh start all
+./demo start all
 
 # View logs from a running demo
-./demo.sh logs python flask
+./demo logs python flask
 
 # Attach to running demo
-./demo.sh attach python flask
+./demo attach python flask
 
 # Stop all demos
-./demo.sh stop all
+./demo stop all
 
 # List available demos
-./demo.sh list
+./demo list
 ```
 
 ## Tmux Session Management

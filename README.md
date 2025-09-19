@@ -37,7 +37,7 @@ the previous step and run the following commands:
 
 ```bash
 cd ~/revenue
-./setup.sh init
+./revenue init
 ```
 
 Once `init` has been run once, a global `revenue` command will be added to your system:

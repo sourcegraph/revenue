@@ -2,9 +2,9 @@
 
 ## Build/Test Commands
 
-- `./setup.sh init` - Initialize workstation with development tools
-- `./setup.sh update` - Update existing tools and packages  
-- `./setup.sh help` - Show usage help
+- `./revenue init` - Initialize workstation with development tools
+- `./revenue update` - Update existing tools and packages  
+- `./revenue help` - Show usage help
 - `revenue init|update|demo` - Global command after setup
 
 ## Demo Management Commands
@@ -15,7 +15,7 @@
 - `revenue demo list` - List all available demos
 - `revenue demo running` - List currently running demos
 - `revenue demo clean --confirm` - Reset demo directory
-- Direct usage: `cd amp_demos && ./demo.sh <command>`
+- Direct usage: `cd amp_demos && ./demo <command>`
 
 ## Architecture
 
@@ -23,9 +23,9 @@ This is a macOS workstation setup tool for Sourcegraph Revenue team using a simp
 
 Key components:
 
-- `setup.sh` - Single, self-contained setup script with all logic integrated
+- `revenue` - Single, self-contained setup script with all logic integrated
 - `Brewfile` - Homebrew dependency management (formulae, casks, VS Code extensions)
-- `amp_demos/demo.sh` - Demo application manager using tmux sessions
+- `amp_demos/demo` - Demo application manager using tmux sessions
 
 ### Demo System Architecture
 
