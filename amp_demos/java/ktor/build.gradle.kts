@@ -9,6 +9,12 @@ version = "0.0.1"
 
 application { mainClass = "io.ktor.server.netty.EngineMain" }
 
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
+
 dependencies {
   implementation(libs.ktor.server.core)
   implementation(libs.ktor.server.pebble)
