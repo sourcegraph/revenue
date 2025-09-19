@@ -285,10 +285,22 @@ list_demos() {
     local session_name
     session_name=$(get_session_name "$language" "$framework")
     local status="stopped"
+    local url_info=""
+    
     if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
       status="running"
+      # Get port info if app is running
+      local config_file="$language/$framework/demo.yaml"
+      if [[ -f "$config_file" ]]; then
+        local port
+        port=$(mise exec -- yq '.port // ""' "$config_file" 2>/dev/null || echo "")
+        if [[ -n "$port" && "$port" != "null" ]]; then
+          url_info=" - http://localhost:$port"
+        fi
+      fi
     fi
-    printf "  %-20s %s\n" "$language/$framework" "($status)"
+    
+    printf "  %-20s %s%s\n" "$language/$framework" "($status)" "$url_info"
   done
 }
 
