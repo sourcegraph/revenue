@@ -1,0 +1,2 @@
+setup: pnpm install --silent
+web: pnpm start

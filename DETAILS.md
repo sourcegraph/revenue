@@ -3,6 +3,15 @@
 This list is everything that will be installed on your workstation when running
 the installer. All dependencies are managed via [Brewfile](/Brewfile).
 
+By default, the repository is installed to `~/revenue`, but you can customize this 
+with the `--install-path` flag:
+
+```bash
+./install.sh --install-path /custom/path
+# or
+revenue init --install-path /custom/path
+```
+
 To update existing installed tools, run `revenue update`
 
 ## Editors and IDEs
@@ -60,6 +69,12 @@ Command-line interface for Amp AI coding assistant
 
 mise allows you to easily install additional developer tools as well a manage
 multiple versions of tools globally or,specific to individual projects.
+
+### overmind
+
+overmind is a process manager for Procfile-based applications and tmux sessions. It provides a simple way to manage multiple processes during development with features like process restart, log aggregation, and easy process interaction.
+
+[Learn more](https://github.com/DarthSim/overmind)
 
 ```bash
 revenue on  main [!?] took 12s

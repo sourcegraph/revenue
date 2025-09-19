@@ -9,30 +9,21 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Shared tmux server name
-TMUX_SERVER="revenue-demo"
-
 print_success() { echo -e "${GREEN}✓${NC} $1"; }
 print_error() { echo -e "${RED}✗${NC} $1"; }
 print_warning() { echo -e "${YELLOW}⚠${NC} $1"; }
 print_info() { echo -e "${BLUE}ℹ${NC} $1"; }
 
-# Check if tmux is available
-check_tmux() {
-  if ! command -v tmux &>/dev/null; then
-    print_error "tmux is required but not installed"
+# Check if overmind is available
+check_overmind() {
+  if ! command -v overmind &>/dev/null; then
+    print_error "overmind is required but not installed"
+    print_info "Install with: brew install overmind"
     exit 1
   fi
 }
 
-# Get session name for a given language and framework
-get_session_name() {
-  local language="$1"
-  local framework="$2"
-  echo "${language}-${framework}"
-}
-
-# Discover all available demo applications (only those with demo.yaml)
+# Discover all demo applications (those with Procfile)
 discover_apps() {
   local apps=()
   for lang_dir in */; do
@@ -42,7 +33,7 @@ discover_apps() {
     fi
     if [[ -d "$lang_dir" ]]; then
       for framework_dir in "$lang_dir"*/; do
-        if [[ -d "$framework_dir" && -f "$framework_dir/demo.yaml" ]]; then
+        if [[ -d "$framework_dir" && -f "$framework_dir/Procfile" ]]; then
           framework=$(basename "$framework_dir")
           apps+=("$lang:$framework")
         fi
@@ -52,7 +43,24 @@ discover_apps() {
   printf '%s\n' "${apps[@]}"
 }
 
-# Check if demo directory has required files and prepare environment
+# Get session name for overmind
+get_session_name() {
+  local language="$1"
+  local framework="$2"
+  echo "${language}-${framework}"
+}
+
+# Get port from .env file
+get_port() {
+  local app_dir="$1"
+  if [[ -f "$app_dir/.env" ]]; then
+    grep "^PORT=" "$app_dir/.env" 2>/dev/null | cut -d'=' -f2 || echo ""
+  else
+    echo ""
+  fi
+}
+
+# Prepare demo environment
 prepare_demo_environment() {
   local language="$1"
   local framework="$2"
@@ -63,65 +71,20 @@ prepare_demo_environment() {
     return 1
   fi
 
-  if [[ ! -f "$app_dir/demo.yaml" ]]; then
-    print_error "No demo.yaml found in $app_dir"
+  if [[ ! -f "$app_dir/Procfile" ]]; then
+    print_error "No Procfile found in $app_dir"
     return 1
   fi
 
-  # Trust and install mise tools
-  print_info "Installing required tools with mise..."
-  if ! (cd "$app_dir" && mise trust 2>/dev/null && mise install 2>/dev/null); then
-    print_warning "mise install failed or no mise configuration found"
+  # Trust and install mise tools if mise config exists
+  if [[ -f "$app_dir/.mise.toml" || -f "$app_dir/.tool-versions" ]]; then
+    print_info "Installing required tools with mise..."
+    if ! (cd "$app_dir" && mise trust 2>/dev/null && mise install 2>/dev/null); then
+      print_warning "mise install failed or no mise configuration found"
+    fi
   fi
 
   return 0
-}
-
-# Parse demo config and execute commands
-execute_demo_config() {
-  local app_dir="$1"
-  local config_file="$app_dir/demo.yaml"
-
-  # Check if yq is available through mise
-  if ! mise exec -- command -v yq &>/dev/null; then
-    print_error "yq is required but not installed. Run 'mise install' in the root directory."
-    return 1
-  fi
-
-  # Parse config values
-  local language
-  language=$(mise exec -- yq '.language // "unknown"' "$config_file")
-  local framework
-  framework=$(mise exec -- yq '.framework // "unknown"' "$config_file")
-  local port
-  port=$(mise exec -- yq '.port // ""' "$config_file")
-  local install_cmd
-  install_cmd=$(mise exec -- yq '.install // ""' "$config_file")
-  local start_cmd
-  start_cmd=$(mise exec -- yq '.start' "$config_file")
-
-  if [[ "$start_cmd" == "null" || -z "$start_cmd" ]]; then
-    print_error "No 'start' command found in $config_file"
-    return 1
-  fi
-
-  # Build command sequence
-  local full_cmd=""
-
-  # Add install command if present
-  if [[ -n "$install_cmd" && "$install_cmd" != "null" ]]; then
-    print_info "Installing dependencies for $language/$framework..."
-    full_cmd="echo 'Installing dependencies...' && $install_cmd && "
-  fi
-
-  # Add start command with announcement
-  if [[ -n "$port" && "$port" != "null" ]]; then
-    full_cmd="${full_cmd}echo 'Starting $language/$framework demo...' && echo 'Application will be available at: http://localhost:$port' && echo '' && $start_cmd"
-  else
-    full_cmd="${full_cmd}echo 'Starting $language/$framework demo...' && echo '' && $start_cmd"
-  fi
-
-  echo "$full_cmd"
 }
 
 # Start a demo application
@@ -144,42 +107,58 @@ start_app() {
   fi
 
   # Check if session already exists
-  if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
-    local config_file="$app_dir/demo.yaml"
+  if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
     local port
-    port=$(mise exec -- yq '.port // ""' "$config_file")
-    print_warning "Demo $language/$framework is already running in session: $session_name"
-    if [[ -n "$port" && "$port" != "null" ]]; then
+    port=$(get_port "$app_dir")
+    print_warning "Demo $language/$framework is already running"
+    if [[ -n "$port" ]]; then
       print_info "Application available at: http://localhost:$port"
     fi
     return 0
   fi
 
-  # Get the port info for display
-  local config_file="$app_dir/demo.yaml"
-  local port
-  port=$(mise exec -- yq '.port // ""' "$config_file")
-
   print_info "Starting $language/$framework demo..."
 
-  # Get the command sequence from the YAML config
-  local demo_command
-  if ! demo_command=$(execute_demo_config "$app_dir"); then
-    return 1
+  # Run setup if it exists in Procfile, then start
+  (
+  cd "$app_dir"
+  if grep -q "^setup:" Procfile; then
+    print_info "Installing dependencies..."
+    local setup_cmd
+    setup_cmd=$(grep "^setup:" Procfile | cut -d':' -f2- | sed 's/^ *//')
+    mise exec -- bash -c "$setup_cmd" || true
   fi
+  # Create a temporary Procfile with only web processes for overmind  
+  if grep -q "^setup:" Procfile; then
+    cp Procfile Procfile.orig
+    grep -v "^setup:" Procfile.orig > Procfile
+  fi
+  mise exec -- overmind start -s "$session_name" -D
+  if [ -f Procfile.orig ]; then
+    mv Procfile.orig Procfile
+  fi
+  ) &
 
-  # Start tmux session in the demo directory with mise environment and execute the command
-  tmux -L "$TMUX_SERVER" new-session -d -s "$session_name" -c "$(pwd)/$app_dir" "mise exec -- bash -c \"$demo_command\""
-
-  # Wait a moment and check if the session is still running
-  sleep 2
-  if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
-    print_success "Started $language/$framework demo in tmux session: $session_name"
-    if [[ -n "$port" && "$port" != "null" ]]; then
+  # Wait a moment and check status
+  sleep 3
+  local status_check=0
+  for i in {1..3}; do
+    if (cd "$app_dir" && overmind status -s "$session_name" 2>/dev/null | grep -q "web.*running"); then
+      status_check=1
+      break
+    fi
+    sleep 2
+  done
+  
+  if [ $status_check -eq 1 ]; then
+    local port
+    port=$(get_port "$app_dir")
+    print_success "Started $language/$framework demo"
+    if [[ -n "$port" ]]; then
       print_info "Application available at: http://localhost:$port"
     fi
     print_info "View logs: revenue demo logs $language $framework"
-    print_info "Attach: revenue demo attach $language $framework"
+    print_info "Connect: revenue demo connect $language $framework"
   else
     print_error "Failed to start $language/$framework demo"
     return 1
@@ -204,7 +183,6 @@ start_all() {
 
   for app in "${apps[@]}"; do
     IFS=':' read -r language framework <<<"$app"
-
     if start_app "$language" "$framework"; then
       started=$((started + 1))
     else
@@ -230,9 +208,10 @@ stop_app() {
 
   local session_name
   session_name=$(get_session_name "$language" "$framework")
+  local app_dir="$language/$framework"
 
-  if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
-    tmux -L "$TMUX_SERVER" kill-session -t "$session_name"
+  if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
+    (cd "$app_dir" && overmind quit -s "$session_name")
     print_success "Stopped $language/$framework demo"
   else
     print_warning "$language/$framework demo is not running"
@@ -241,24 +220,141 @@ stop_app() {
 
 # Stop all demo applications
 stop_all() {
-  local sessions
-  sessions=$(tmux -L "$TMUX_SERVER" list-sessions -F "#{session_name}" 2>/dev/null || true)
+  local apps=()
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && apps+=("$line")
+  done < <(discover_apps)
 
-  if [[ -z "$sessions" ]]; then
-    print_info "No demo applications are currently running"
+  if [[ ${#apps[@]} -eq 0 ]]; then
+    print_info "No demo applications found"
     return 0
   fi
 
   print_info "Stopping all demo applications..."
-  while IFS= read -r session; do
-    if [[ -n "$session" ]]; then
-      tmux -L "$TMUX_SERVER" kill-session -t "$session"
-      print_success "Stopped session: $session"
-    fi
-  done <<<"$sessions"
+  for app in "${apps[@]}"; do
+    IFS=':' read -r language framework <<<"$app"
+    stop_app "$language" "$framework"
+  done
 }
 
-# Clean the demo directory
+# View logs from a demo application
+logs_app() {
+  local language="$1"
+  local framework="$2"
+
+  if [[ -z "$language" || -z "$framework" ]]; then
+    print_error "Usage: demo logs <language> <framework>"
+    return 1
+  fi
+
+  local session_name
+  session_name=$(get_session_name "$language" "$framework")
+  local app_dir="$language/$framework"
+
+  if ! (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
+    print_error "$language/$framework demo is not running"
+    return 1
+  fi
+
+  print_info "Logs from $language/$framework demo:"
+  print_info "Press Ctrl+C to exit logs"
+  echo ""
+  
+  # Find the overmind tmux socket for this session
+  local tmux_socket
+  local tmux_session_name="$framework"  # overmind uses just the framework name
+  tmux_socket=$(ps aux | grep "tmux.*$tmux_session_name" | grep -v grep | head -1 | sed -n 's/.*-L \([^ ]*\).*/\1/p')
+  
+  if [[ -n "$tmux_socket" ]]; then
+    # Set up clean exit on interrupt with a flag
+    local continue_logs=1
+    trap 'continue_logs=0; printf "\r\033[K"; print_info "Exited logs"' INT
+    
+    # Use tmux to capture and follow the pane output
+    tmux -L "$tmux_socket" capture-pane -t "$tmux_session_name" -p
+    echo ""
+    print_info "Following live logs (press Ctrl+C to exit):"
+    
+    while [ $continue_logs -eq 1 ]; do
+      sleep 2
+      if [ $continue_logs -eq 1 ]; then
+        tmux -L "$tmux_socket" capture-pane -t "$tmux_session_name" -p | tail -10
+      fi
+    done
+    trap - INT
+  else
+    print_error "Could not find tmux session for $language/$framework"
+    return 1
+  fi
+}
+
+# Connect to a demo application
+connect_app() {
+  local language="$1"
+  local framework="$2"
+
+  if [[ -z "$language" || -z "$framework" ]]; then
+    print_error "Usage: demo connect <language> <framework>"
+    return 1
+  fi
+
+  local session_name
+  session_name=$(get_session_name "$language" "$framework")
+  local app_dir="$language/$framework"
+
+  if ! (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
+    print_error "$language/$framework demo is not running"
+    return 1
+  fi
+
+  print_info "Connecting to $language/$framework demo..."
+  (cd "$app_dir" && overmind connect web -s "$session_name")
+}
+
+# List all available demos
+list_demos() {
+  print_info "Available demo applications:"
+  discover_apps | while IFS=':' read -r language framework; do
+    local session_name
+    session_name=$(get_session_name "$language" "$framework")
+    local app_dir="$language/$framework"
+    local status="stopped"
+    local url_info=""
+    
+    if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
+      status="running"
+      local port
+      port=$(get_port "$app_dir")
+      if [[ -n "$port" ]]; then
+        url_info=" - http://localhost:$port"
+      fi
+    fi
+    
+    printf "  %-20s %s%s\n" "$language/$framework" "($status)" "$url_info"
+  done
+}
+
+# List running demos
+list_running() {
+  print_info "Running demo applications:"
+  discover_apps | while IFS=':' read -r language framework; do
+    local session_name
+    session_name=$(get_session_name "$language" "$framework")
+    local app_dir="$language/$framework"
+    
+    if (cd "$app_dir" && overmind status -s "$session_name" &>/dev/null); then
+      local port
+      port=$(get_port "$app_dir")
+      local url_info=""
+      if [[ -n "$port" ]]; then
+        url_info=" - http://localhost:$port"
+      fi
+      printf "  %-20s %s%s\n" "$language/$framework" "(running)" "$url_info"
+    fi
+  done
+}
+
+# Clean the demo directory (same as original)
 clean_demos() {
   local confirm_flag="$1"
 
@@ -280,100 +376,6 @@ clean_demos() {
   print_success "Demo directory cleaned and reset"
 }
 
-# List all available demos
-list_demos() {
-  print_info "Available demo applications:"
-  discover_apps | while IFS=':' read -r language framework; do
-    local session_name
-    session_name=$(get_session_name "$language" "$framework")
-    local status="stopped"
-    local url_info=""
-    
-    if tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
-      status="running"
-      # Get port info if app is running
-      local config_file="$language/$framework/demo.yaml"
-      if [[ -f "$config_file" ]]; then
-        local port
-        port=$(mise exec -- yq '.port // ""' "$config_file" 2>/dev/null || echo "")
-        if [[ -n "$port" && "$port" != "null" ]]; then
-          url_info=" - http://localhost:$port"
-        fi
-      fi
-    fi
-    
-    printf "  %-20s %s%s\n" "$language/$framework" "($status)" "$url_info"
-  done
-}
-
-# View logs from a demo application
-logs_app() {
-  local language="$1"
-  local framework="$2"
-
-  if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo logs <language> <framework>"
-    return 1
-  fi
-
-  local session_name
-  session_name=$(get_session_name "$language" "$framework")
-
-  if ! tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
-    print_error "$language/$framework demo is not running"
-    return 1
-  fi
-
-  print_info "Current output from $language/$framework demo:"
-  echo ""
-
-  # Capture and display the current pane content
-  tmux -L "$TMUX_SERVER" capture-pane -t "$session_name" -p
-
-  echo ""
-  print_info "Use 'revenue demo attach $language $framework' to interact with the session"
-}
-
-# Attach to a demo application
-attach_app() {
-  local language="$1"
-  local framework="$2"
-
-  if [[ -z "$language" || -z "$framework" ]]; then
-    print_error "Usage: demo attach <language> <framework>"
-    return 1
-  fi
-
-  local session_name
-  session_name=$(get_session_name "$language" "$framework")
-
-  if ! tmux -L "$TMUX_SERVER" has-session -t "$session_name" 2>/dev/null; then
-    print_error "$language/$framework demo is not running"
-    return 1
-  fi
-
-  print_info "Attaching to $language/$framework demo session..."
-  tmux -L "$TMUX_SERVER" attach -t "$session_name"
-}
-
-# List running demos
-list_running() {
-  local sessions
-  sessions=$(tmux -L "$TMUX_SERVER" list-sessions -F "#{session_name}" 2>/dev/null || true)
-
-  if [[ -z "$sessions" ]]; then
-    print_info "No demo applications are currently running"
-    return 0
-  fi
-
-  print_info "Running demo applications:"
-  while IFS= read -r session; do
-    if [[ -n "$session" ]]; then
-      printf "  %-20s %s\n" "$session" "(running)"
-    fi
-  done <<<"$sessions"
-}
-
 # Show usage information
 show_usage() {
   echo "Demo Application Manager"
@@ -384,7 +386,7 @@ show_usage() {
   echo "  demo stop <language> <framework>    Stop a demo application"
   echo "  demo stop all                       Stop all demo applications"
   echo "  demo logs <language> <framework>    View logs from a running demo"
-  echo "  demo attach <language> <framework>  Attach to a running demo session"
+  echo "  demo connect <language> <framework> Connect to a running demo"
   echo "  demo list                           List all available demos"
   echo "  demo running                        List running demos"
   echo "  demo clean --confirm                Reset demo directory"
@@ -396,13 +398,13 @@ show_usage() {
   echo "  demo stop javascript react"
   echo "  demo stop all"
   echo "  demo logs python flask"
-  echo "  demo attach python flask"
+  echo "  demo connect python flask"
   echo ""
 }
 
 # Main script logic
 main() {
-  check_tmux
+  check_overmind
 
   local command="$1"
 
@@ -424,8 +426,8 @@ main() {
   logs)
     logs_app "$2" "$3"
     ;;
-  attach)
-    attach_app "$2" "$3"
+  connect|attach)
+    connect_app "$2" "$3"
     ;;
   list)
     list_demos

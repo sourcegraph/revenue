@@ -1,0 +1,2 @@
+setup: ./gradlew build -x test --quiet
+web: ./gradlew run

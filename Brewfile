@@ -8,6 +8,7 @@ brew "jq"
 brew "mise"
 brew "python"
 brew "tmux"
+brew "overmind"
 brew "tree" 
 brew "yq"
 

@@ -1,37 +1,46 @@
 # Demo Application Manager
 
-The demo application manager allows running multiple language/framework demos in
-isolated tmux sessions using configuration files.
+The demo application manager allows running multiple language/framework demos
+using [Overmind](https://github.com/DarthSim/overmind)
 
 ## Directory Structure
 
 The script expects demo applications to be organized as:
 
-```
+```text
 amp_demos/
-├── demo
+├── demo                 # Overmind-based demo manager
 ├── <language>/
 │   └── <framework>/
-│       ├── demo.yaml        # Required configuration file
-│       ├── .mise.toml       # Optional: tool requirements
-│       └── ...              # Your demo files
+│       ├── Procfile     # Required: Overmind process definition
+│       ├── .env         # Required: Environment variables (PORT, etc.)
+│       ├── .mise.toml   # Optional: tool requirements
+│       └── ...          # Your demo files
 ```
 
-Only directories containing `demo.yaml` are recognized as valid demos.
+Only directories containing `Procfile` are recognized as valid demos.
 
 ## Configuration Format
 
-Each demo requires a `demo.yaml` configuration file:
+Each demo requires a `Procfile` and `.env` file:
 
-```yaml
-language: javascript    # Language identifier
-framework: react       # Framework identifier  
-port: 3000            # Application port (for URL display)
-install: pnpm install --silent  # Optional: dependency installation command
-start: pnpm start     # Required: command to start the application
+### [Procfile](https://devcenter.heroku.com/articles/procfile) (standard Procfile format)
+
+```Procfile
+setup: pnpm install --silent
+web: pnpm start
 ```
 
-The `install` field is optional and runs before the `start` command. The `port` field is used to display the application URL.
+#### .env (environment variables)
+
+```env
+PORT=3000
+LANGUAGE=javascript
+FRAMEWORK=react
+```
+
+The `setup` process is optional and runs before starting the `web` process. The
+`PORT` variable is used to display the application URL.
 
 ## Usage
 
@@ -80,8 +89,8 @@ cd amp_demos
 ### View and Interact with Demos
 
 ```bash
-./demo logs <language> <framework>    # View current logs from a running demo
-./demo attach <language> <framework>  # Attach to a running demo session
+./demo logs <language> <framework>    # View logs from a running demo
+./demo connect <language> <framework> # Connect to a running demo session
 ```
 
 ### List Demos
@@ -99,11 +108,12 @@ cd amp_demos
 
 ## How It Works
 
-1. **Discovery**: Scans subdirectories for `demo.yaml` configuration files
+1. **Discovery**: Scans subdirectories for `Procfile` configuration files
 2. **Environment**: Runs `mise install` in each demo directory (if available)
-3. **Config Parsing**: Reads the demo configuration using `yq`
-4. **Session Management**: Creates isolated tmux sessions named `<language>-<framework>`
-5. **Execution**: Runs install and start commands within the mise environment
+3. **Config Parsing**: Uses standard Procfile format and `.env` files
+4. **Process Management**: Uses Overmind to manage processes with tmux sessions
+named `<language>-<framework>`
+5. **Execution**: Runs setup and web processes as defined in Procfile
 
 ## Examples
 
@@ -117,8 +127,8 @@ cd amp_demos
 # View logs from a running demo
 ./demo logs python flask
 
-# Attach to running demo
-./demo attach python flask
+# Connect to running demo
+./demo connect python flask
 
 # Stop all demos
 ./demo stop all
@@ -127,12 +137,17 @@ cd amp_demos
 ./demo list
 ```
 
-## Tmux Session Management
+## Process Management
 
-All demos run in a shared tmux server named `revenue-demo`. Sessions are automatically named using the pattern `<language>-<framework>`.
+Overmind manages all demos using tmux sessions named using the pattern
+`<language>-<framework>`. Each demo runs its processes as defined in the Procfile.
 
-To manually attach to a running demo:
+To manually connect to a running demo process:
 
 ```bash
-tmux -L revenue-demo attach -t <session-name>
-```
+cd <language>/<framework>
+overmind connect web -s <language>-<framework>
+
+# Or using tmux directly
+tmux attach -t <language>-<framework>
+

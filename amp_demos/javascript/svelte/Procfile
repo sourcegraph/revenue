@@ -1,0 +1,2 @@
+setup: pnpm install
+web: pnpm run dev
