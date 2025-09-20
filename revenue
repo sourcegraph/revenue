@@ -72,6 +72,7 @@ COMMANDS:
 
 EXAMPLES:
     revenue init
+    revenue init --install-path /custom/path
     revenue update
     revenue demo start python flask
     revenue help
@@ -321,7 +322,12 @@ update_repository() {
 
 # Initialize development environment
 init_environment() {
+  local installer_args=("$@")
+  
   print_info "Delegating to bootstrap installer for complete setup..."
+  if [[ ${#installer_args[@]} -gt 0 ]]; then
+    print_info "Passing arguments: ${installer_args[*]}"
+  fi
   echo ""
   
   # Use local install.sh if available, otherwise download it
@@ -330,7 +336,7 @@ init_environment() {
   
   if [[ -f "$local_installer" ]]; then
     print_info "Using local installer..."
-    if bash "$local_installer"; then
+    if bash "$local_installer" "${installer_args[@]}"; then
       print_success "Environment initialization completed!"
     else
       print_error "Local installation failed"
@@ -338,6 +344,8 @@ init_environment() {
     fi
   else
     print_info "Downloading installer from repository..."
+    print_warning "Note: Remote installer does not support custom arguments like --install-path"
+    print_info "For custom installation paths, clone the repository first and use the local installer"
     if curl -fsSL "$installer_url" | bash; then
       print_success "Environment initialization completed!"
     else
@@ -365,7 +373,8 @@ main() {
 
   case "$action" in
   "init")
-    init_environment
+    shift # Remove 'init' from arguments
+    init_environment "$@"
     ;;
   "update")
     update_environment

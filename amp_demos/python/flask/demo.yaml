@@ -1,4 +1,0 @@
-language: python
-framework: flask
-port: 8000
-start: uv run python main.py

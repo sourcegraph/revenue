@@ -8,6 +8,9 @@ set -e
 # Global flag to track if shell profile was modified
 shell_profile_modified=false
 
+# Default repository directory (can be overridden by --install-path)
+repo_dir="$HOME/revenue"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -38,8 +41,50 @@ print_header() {
   echo "=========================================="
   echo ""
   print_info "This will set up your macOS workstation with all the tools needed for demos and development."
+  print_info "Repository will be installed to: $repo_dir"
   print_info "Estimated time: 15-30 minutes (depending on internet speed)"
   echo ""
+}
+
+# Parse command line arguments
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --install-path)
+        if [[ -z "$2" || "$2" == --* ]]; then
+          print_error "Error: --install-path requires a directory path"
+          print_info "Usage: $0 [--install-path /path/to/directory]"
+          exit 1
+        fi
+        repo_dir="$2"
+        shift 2
+        ;;
+      --help|-h)
+        print_info "Sourcegraph Revenue Team Workstation Setup"
+        echo ""
+        print_info "Usage: $0 [OPTIONS]"
+        echo ""
+        print_info "Options:"
+        print_info "  --install-path PATH    Install repository to specified path (default: \$HOME/revenue)"
+        print_info "  --help, -h             Show this help message"
+        echo ""
+        exit 0
+        ;;
+      *)
+        print_error "Unknown option: $1"
+        print_info "Use --help for usage information"
+        exit 1
+        ;;
+    esac
+  done
+
+  # Expand tilde to home directory if present
+  repo_dir="${repo_dir/#\~/$HOME}"
+  
+  # Convert to absolute path if relative
+  if [[ "$repo_dir" != /* ]]; then
+    repo_dir="$(pwd)/$repo_dir"
+  fi
 }
 
 # Check if we're on macOS
@@ -111,8 +156,18 @@ check_github_access() {
 
 # Clone or update the repository
 setup_repository() {
-  repo_dir="$HOME/revenue" # Make repo_dir global for use by other functions
   local repo_url="https://github.com/sourcegraph/revenue.git"
+  
+  # Create parent directory if it doesn't exist
+  local parent_dir
+  parent_dir="$(dirname "$repo_dir")"
+  if [[ ! -d "$parent_dir" ]]; then
+    print_info "Creating parent directory: $parent_dir"
+    if ! mkdir -p "$parent_dir"; then
+      print_error "Failed to create parent directory: $parent_dir"
+      exit 1
+    fi
+  fi
 
   if [[ -d "$repo_dir" ]]; then
     print_info "Repository already exists at $repo_dir"
@@ -413,6 +468,7 @@ run_installer() {
 
 # Main installation flow
 main() {
+  parse_arguments "$@"
   print_header
   check_macos
   check_git

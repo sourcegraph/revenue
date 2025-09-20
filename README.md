@@ -1,6 +1,7 @@
 # Sourcegraph Revenue Team Workstation Setup
 
-Complete macOS workstation setup for Revenue team members. Installs all tools needed for demos and development.
+Complete macOS workstation setup for Revenue team members. Installs all tools
+needed for demos and development.
 
 ## Quick Start
 
@@ -12,7 +13,7 @@ Complete macOS workstation setup for Revenue team members. Installs all tools ne
 
 **That's it!** The installer will:
 
-- Download this repository to `~/revenue`
+- Download this repository to `~/revenue` (customizable with `--install-path`)
 - Install all necessary tools (VS Code, Python, Java, etc.)
 - Set up demo applications
 - Take about 15-30 minutes
@@ -22,32 +23,20 @@ Complete macOS workstation setup for Revenue team members. Installs all tools ne
 Once setup is complete, you can use the `revenue` command:
 
 ```bash
-revenue demo list        # See available demo apps
-revenue demo start python flask  # Start a specific demo
-revenue update          # Update tools to latest versions
-```
-
-## Demo Applications
-
-Quick commands for managing demo applications:
-
-```bash
-# Start any demo
-revenue demo start <language> <framework>
-revenue demo start python flask
-revenue demo start javascript react
-
-# Stop demos
-revenue demo stop python flask
-revenue demo stop all
-
-# View available demos
-revenue demo list
-revenue demo running
-
-# View logs and attach to sessions
-revenue demo logs python flask
-revenue demo attach python flask
+revenue demo list                    # See available demo apps
+revenue demo running                 # See only running demos
+revenue demo start python flask     # Start a specific demo
+revenue demo start all               # Start all demos
+revenue demo stop python flask      # Stop a specific demo
+revenue demo stop all                # Stop all demos
+revenue demo restart python flask   # Restart a specific demo
+revenue demo restart all             # Restart all running demos
+revenue demo logs python flask      # View logs from a running demo
+revenue demo connect python flask   # Connect to a running demo session
+revenue demo clean --confirm         # Force cleanup all processes and sockets
+revenue demo reset --confirm         # Reset to clean git state
+revenue update                       # Update tools to latest versions
+revenue init --install-path /custom/path  # Reinstall to custom location
 ```
 
 See [amp_demos/README.md](amp_demos/README.md) for complete demo documentation.
@@ -56,21 +45,21 @@ See [amp_demos/README.md](amp_demos/README.md) for complete demo documentation.
 
 ### Common Issues
 
-**"Command not found: revenue"**
+#### "Command not found: revenue"
 
 - Close and reopen Terminal, or run: `source ~/.zshrc`
 
-**"Cannot clone repository"**
+#### "Cannot clone repository"
 
 - Ensure you have access to GitHub and the Sourcegraph organization
-- Ask in [#ask-tech-ops](https://sourcegraph.slack.com/archives/C01CSS3TC75) for repository access
+- Ask in [#ask-tech-ops](https://sourcegraph.slack.com/archives/C01CSS3TC75)
 
-**Installation fails with network errors**
+#### Installation fails with network errors
 
 - Check VPN/proxy settings
 - Rerun the installer - it's safe to run multiple times
 
-**"Xcode Command Line Tools required"**
+#### "Xcode Command Line Tools required"
 
 - Run: `xcode-select --install`
 - Wait for installation to complete, then rerun the installer
@@ -81,7 +70,8 @@ If you're stuck:
 
 1. Check the error message for specific guidance
 2. Try running the installer again (it's safe to repeat)
-3. Ask in [#ask-tech-ops](https://sourcegraph.slack.com/archives/C01CSS3TC75) with the error details
+3. Ask in [#discuss-field-engineering](https://sourcegraph.slack.com/archives/C095PTMTS31)
+with the error details
 
 ## Manual Setup (Alternative)
 
@@ -95,7 +85,24 @@ xcode-select --install
 git clone https://github.com/sourcegraph/revenue.git ~/revenue
 cd ~/revenue
 
-# 3. Run setup
+# 3. Run setup (default location)
+./install.sh
+
+# OR: Custom installation path
+./install.sh --install-path /custom/path
+```
+
+### Custom Installation Path
+
+To install the repository to a different location:
+
+```bash
+# Download installer directly
+curl -fsSL https://raw.githubusercontent.com/sourcegraph/revenue/main/install.sh | bash -s -- --install-path /custom/path
+
+# Or clone first and run locally (recommended for custom paths)
+git clone https://github.com/sourcegraph/revenue.git /custom/path
+cd /custom/path
 ./install.sh
 ```
 
