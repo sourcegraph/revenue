@@ -1,0 +1,652 @@
+/* Amp Design System Tokens */
+/* Extracted from amp/lib/css/palette.css and base.css */
+
+:root {
+  /* Core color tokens - Light Mode */
+  --background: #fafaf8;
+  --foreground: #0b0d0b;
+  --border: rgba(135, 139, 134, 0.2);
+  --muted: hsl(0 0% 92%);
+  --muted-foreground: hsl(0 0% 35%);
+  --popover: hsl(0 0% 95%);
+  --popover-foreground: hsl(0 0% 3%);
+  --card: rgba(11, 13, 11, 0.02);
+  --card-foreground: var(--foreground);
+  --input-border: hsla(120, 8%, 5%, 0.15);
+  --input-background: hsl(0, 0%, 99%);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: hsl(220 14% 85%);
+  --secondary-foreground: hsl(220 10% 20%);
+  --accent: rgba(11, 13, 11, 0.07);
+  --accent-foreground: var(--foreground);
+  --warning: hsl(41, 94%, 32%);
+  --warning-foreground: hsl(42, 76%, 77%);
+  --warning-border: hsl(41, 63%, 63%);
+  --destructive: hsl(0 62.8% 55%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --success: hsl(120, 58%, 40%);
+  --ring: var(--foreground);
+  --editor-background: hsl(240 5.9% 95%);
+  --editor-foreground: hsl(240 4.8% 10%);
+  --diff-addition-background: hsl(90deg 40% 90%);
+  --diff-removal-background: hsl(0 40% 90%);
+  --diff-addition-foreground: hsl(120 70% 25%);
+  --diff-removal-foreground: hsl(0 100% 30%);
+  --diff-meta-foreground: hsl(60, 70%, 35%);
+  --command-item-hover: var(--accent);
+  --command-item-hover-foreground: var(--accent-foreground);
+  --command-item-focus: var(--accent);
+  --command-item-focus-foreground: var(--accent-foreground);
+
+  /* Syntax highlighting */
+  --hljs-function: hsl(190, 80%, 40%);
+  --hljs-keyword: hsl(326, 70%, 45%);
+  --hljs-class: hsl(135, 60%, 35%);
+  --hljs-string: hsl(65, 70%, 35%);
+  --hljs-comment: hsl(231, 15%, 55%);
+  --hljs-number: hsl(265, 60%, 40%);
+
+  /* Terminal colors */
+  --terminal-black: hsl(230, 13%, 30%);
+  --terminal-red: hsl(355, 90%, 40%);
+  --terminal-green: hsl(120, 45%, 30%);
+  --terminal-yellow: hsl(39, 80%, 35%);
+  --terminal-blue: hsl(210, 90%, 45%);
+  --terminal-magenta: hsl(325, 65%, 45%);
+  --terminal-cyan: hsl(185, 65%, 30%);
+  --terminal-white: hsl(220, 8%, 20%);
+  --terminal-bright-black: hsl(230, 13%, 40%);
+  --terminal-bright-red: hsl(355, 85%, 45%);
+  --terminal-bright-green: hsl(120, 50%, 35%);
+  --terminal-bright-yellow: hsl(39, 85%, 40%);
+  --terminal-bright-blue: hsl(210, 100%, 50%);
+  --terminal-bright-magenta: hsl(325, 75%, 50%);
+  --terminal-bright-cyan: hsl(185, 58%, 35%);
+  --terminal-bright-white: hsl(220, 10%, 25%);
+
+  /* Typography scale */
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 0.75rem;
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 0.85rem;
+  --text-sm: 0.75rem;
+  --text-sm--line-height: 1rem;
+  --text-base: 0.8125rem;
+  --text-base--line-height: 1.25rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+
+  /* Border radius scale */
+  --radius: 0.5rem;
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Fonts */
+  --font-perfectly-nineties: 'Perfectly Nineties', serif;
+}
+
+/* Dark mode tokens */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: rgba(11, 13, 11, 1);
+    --foreground: rgba(246, 255, 245, 1);
+    --border: rgba(135, 139, 134, 0.2);
+    --muted: rgba(135, 139, 134, 0.1);
+    --muted-foreground: #9ca49c;
+    --popover: hsl(0 0% 2%);
+    --popover-foreground: hsl(0 0% 98%);
+    --card: rgba(246, 255, 245, 0.03);
+    --card-foreground: var(--foreground);
+    --input-border: rgba(246, 255, 245, 0.15);
+    --input-background: rgba(11, 13, 11, 1);
+    --primary: var(--foreground);
+    --primary-foreground: var(--background);
+    --secondary: hsl(90, 2%, 20%);
+    --secondary-foreground: var(--foreground);
+    --accent: rgba(246, 255, 245, 0.07);
+    --accent-foreground: var(--foreground);
+    --warning: hsl(41.2 99.8% 55.3%);
+    --warning-foreground: hsl(41, 88%, 13%);
+    --warning-border: hsl(41.2 99.8% 35%);
+    --destructive: hsl(0 62.8% 45.6%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --success: hsl(120, 58%, 40%);
+    --ring: var(--foreground);
+    --editor-background: hsl(240, 9%, 7%);
+    --editor-foreground: hsl(0, 0%, 73%);
+    --diff-addition-background: hsl(90deg 35% 22%);
+    --diff-removal-background: hsl(0 35% 22%);
+    --diff-addition-foreground: hsl(120 60% 55%);
+    --diff-removal-foreground: hsl(0 70% 60%);
+    --diff-meta-foreground: hsl(60, 70%, 50%);
+
+    --hljs-function: hsl(190, 80%, 70%);
+    --hljs-keyword: hsl(326, 100%, 74%);
+    --hljs-class: hsl(135, 94%, 65%);
+    --hljs-string: hsl(65, 92%, 76%);
+    --hljs-comment: hsl(231, 28%, 52%);
+    --hljs-number: hsl(265, 89%, 78%);
+
+    --terminal-black: hsl(230, 13%, 40%);
+    --terminal-red: hsl(355, 90%, 44%);
+    --terminal-green: hsl(120, 58%, 40%);
+    --terminal-yellow: hsl(39, 80%, 45%);
+    --terminal-blue: hsl(210, 90%, 53%);
+    --terminal-magenta: hsl(325, 73%, 70%);
+    --terminal-cyan: hsl(185, 73%, 35%);
+    --terminal-white: hsl(220, 8%, 72%);
+    --terminal-bright-black: hsl(230, 13%, 47%);
+    --terminal-bright-red: hsl(355, 85%, 52%);
+    --terminal-bright-green: hsl(120, 50%, 46%);
+    --terminal-bright-yellow: hsl(39, 85%, 55%);
+    --terminal-bright-blue: hsl(210, 100%, 63%);
+    --terminal-bright-magenta: hsl(325, 97%, 76%);
+    --terminal-bright-cyan: hsl(185, 58%, 42%);
+    --terminal-bright-white: hsl(220, 10%, 77%);
+  }
+}
+
+/* Data attribute based dark mode support */
+:root[data-theme="dark"] {
+  --background: rgba(11, 13, 11, 1);
+  --foreground: rgba(246, 255, 245, 1);
+  --border: rgba(135, 139, 134, 0.2);
+  --muted: rgba(135, 139, 134, 0.1);
+  --muted-foreground: #9ca49c;
+  --popover: hsl(0 0% 2%);
+  --popover-foreground: hsl(0 0% 98%);
+  --card: rgba(246, 255, 245, 0.03);
+  --card-foreground: var(--foreground);
+  --input-border: rgba(246, 255, 245, 0.15);
+  --input-background: rgba(11, 13, 11, 1);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: hsl(90, 2%, 20%);
+  --secondary-foreground: var(--foreground);
+  --accent: rgba(246, 255, 245, 0.07);
+  --accent-foreground: var(--foreground);
+  --warning: hsl(41.2 99.8% 55.3%);
+  --warning-foreground: hsl(41, 88%, 13%);
+  --warning-border: hsl(41.2 99.8% 35%);
+  --destructive: hsl(0 62.8% 45.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --success: hsl(120, 58%, 40%);
+  --ring: var(--foreground);
+  --editor-background: hsl(240, 9%, 7%);
+  --editor-foreground: hsl(0, 0%, 73%);
+  --diff-addition-background: hsl(90deg 35% 22%);
+  --diff-removal-background: hsl(0 35% 22%);
+  --diff-addition-foreground: hsl(120 60% 55%);
+  --diff-removal-foreground: hsl(0 70% 60%);
+  --diff-meta-foreground: hsl(60, 70%, 50%);
+
+  --hljs-function: hsl(190, 80%, 70%);
+  --hljs-keyword: hsl(326, 100%, 74%);
+  --hljs-class: hsl(135, 94%, 65%);
+  --hljs-string: hsl(65, 92%, 76%);
+  --hljs-comment: hsl(231, 28%, 52%);
+  --hljs-number: hsl(265, 89%, 78%);
+
+  --terminal-black: hsl(230, 13%, 40%);
+  --terminal-red: hsl(355, 90%, 44%);
+  --terminal-green: hsl(120, 58%, 40%);
+  --terminal-yellow: hsl(39, 80%, 45%);
+  --terminal-blue: hsl(210, 90%, 53%);
+  --terminal-magenta: hsl(325, 73%, 70%);
+  --terminal-cyan: hsl(185, 73%, 35%);
+  --terminal-white: hsl(220, 8%, 72%);
+  --terminal-bright-black: hsl(230, 13%, 47%);
+  --terminal-bright-red: hsl(355, 85%, 52%);
+  --terminal-bright-green: hsl(120, 50%, 46%);
+  --terminal-bright-yellow: hsl(39, 85%, 55%);
+  --terminal-bright-blue: hsl(210, 100%, 63%);
+  --terminal-bright-magenta: hsl(325, 97%, 76%);
+  --terminal-bright-cyan: hsl(185, 58%, 42%);
+  --terminal-bright-white: hsl(220, 10%, 77%);
+}
+/* Color Mapping Layer */
+/* Maps --color-* aliases to base tokens for Tailwind-style compatibility */
+
+:root {
+  --color-border: var(--border);
+  --color-background: var(--background);
+  --color-input-border: var(--input-border);
+  --color-input-background: var(--input-background);
+  --color-ring: var(--ring);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-border: var(--warning-border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-editor: var(--editor-background);
+  --color-editor-background: var(--editor-foreground);
+  --color-command-item-hover: var(--command-item-hover);
+  --color-command-item-hover-foreground: var(--command-item-hover-foreground);
+  --color-command-item-focus: var(--command-item-focus);
+  --color-command-item-focus-foreground: var(--command-item-focus-foreground);
+  
+  /* Terminal color mappings */
+  --color-terminal-black: var(--terminal-black);
+  --color-terminal-red: var(--terminal-red);
+  --color-terminal-green: var(--terminal-green);
+  --color-terminal-yellow: var(--terminal-yellow);
+  --color-terminal-blue: var(--terminal-blue);
+  --color-terminal-magenta: var(--terminal-magenta);
+  --color-terminal-cyan: var(--terminal-cyan);
+  --color-terminal-white: var(--terminal-white);
+  --color-terminal-bright-black: var(--terminal-bright-black);
+  --color-terminal-bright-red: var(--terminal-bright-red);
+  --color-terminal-bright-green: var(--terminal-bright-green);
+  --color-terminal-bright-yellow: var(--terminal-bright-yellow);
+  --color-terminal-bright-blue: var(--terminal-bright-blue);
+  --color-terminal-bright-magenta: var(--terminal-bright-magenta);
+  --color-terminal-bright-cyan: var(--terminal-bright-cyan);
+  --color-terminal-bright-white: var(--terminal-bright-white);
+}
+/* Base Styles and Reset */
+/* Minimal reset and base styles extracted from Amp's base.css */
+
+*,
+*::before,
+*::after,
+::backdrop,
+::file-selector-button {
+  box-sizing: border-box;
+  border: 0 solid var(--color-border, currentColor);
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+
+/* Selection styling */
+::selection {
+  background-color: color-mix(in srgb, var(--terminal-bright-yellow) 30%, transparent);
+}
+
+/* Code styling */
+code,
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  background: var(--muted);
+  color: var(--foreground);
+  border-radius: var(--radius-xs);
+  padding: 1px 2px;
+}
+
+/* Form elements */
+input,
+textarea {
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  color: var(--foreground);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Button styling */
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+[role='button']:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Keyboard shortcuts */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  background: var(--muted);
+  color: var(--foreground);
+  border-radius: var(--radius-xs);
+  outline: 1px solid var(--muted);
+  padding: 0 3px;
+  line-height: 1;
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+/* Highlight/mark styling */
+mark {
+  background: color-mix(in srgb, var(--terminal-yellow) 60%, transparent);
+  border-radius: var(--radius-xs);
+}
+
+mark[aria-current='true'] {
+  background: var(--terminal-yellow);
+}
+
+/* Utility classes for stretched links */
+.stretched-link-container {
+  position: relative;
+}
+
+.stretched-link::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  content: '';
+}
+
+.stretched-link-container [data-tooltip-trigger],
+.stretched-link-container [data-popover-trigger],
+.stretched-link-container button {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hidden utility */
+[hidden] {
+  display: none !important;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* Adapter Layer - sg-* Classes Reimplemented with Amp Tokens */
+/* Maintains existing class names but uses Amp design tokens */
+
+/* Layout primitives */
+.sg-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem; /* 20px equivalent */
+}
+
+.sg-header,
+.sg-content {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  /* Remove glass blur and heavy shadows for clean Amp aesthetic */
+  box-shadow: none;
+  padding: 1rem;
+}
+
+.sg-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.sg-header h1 {
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  margin: 0;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.sg-content {
+  padding: 2rem;
+}
+
+.sg-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+/* Sections */
+.sg-welcome {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.sg-welcome h2 {
+  font-size: clamp(1.25rem, 1rem + 0.8vw, 1.5rem);
+  margin: 0 0 1rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.sg-welcome p {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+/* Features grid */
+.sg-features {
+  display: grid;
+  gap: 2rem;
+  margin-top: 3rem;
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+@media (min-width: 640px) {
+  .sg-features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .sg-features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Cards */
+.sg-card {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  padding: 1.5rem;
+  max-width: 300px;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.sg-card:hover {
+  border-color: var(--accent-foreground);
+}
+
+.sg-card h3 {
+  font-size: 1.125rem;
+  color: var(--foreground);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.sg-card p {
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* Utilities */
+.sg-center {
+  text-align: center;
+}
+
+.sg-muted {
+  color: var(--muted-foreground);
+}
+
+.sg-glass {
+  /* Updated to use Amp tokens instead of glassmorphism */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+/* Spacing utilities */
+.sg-stack > * + * {
+  margin-top: 1rem;
+}
+
+.sg-mb-4 {
+  margin-bottom: 1rem;
+}
+
+.sg-mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.sg-p-4 {
+  padding: 1rem;
+}
+
+.sg-p-6 {
+  padding: 1.5rem;
+}
+
+/* Mobile-friendly content padding */
+@media (max-width: 480px) {
+  .sg-content {
+    padding: 1.5rem;
+  }
+  
+  .sg-container {
+    padding: 1rem;
+  }
+}
+
+/* Link styling */
+a {
+  color: var(--primary);
+  text-decoration: underline;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: var(--accent-foreground);
+}
+
+a:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Button styling */
+.sg-button,
+button.sg-button {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-size: var(--text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.sg-button:hover,
+button.sg-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+
+.sg-button:focus,
+button.sg-button:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.sg-button:disabled,
+button.sg-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary button variant */
+.sg-button--secondary,
+button.sg-button--secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--secondary);
+}
+
+.sg-button--secondary:hover,
+button.sg-button--secondary:hover {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--muted);
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .sg-card,
+  .sg-button,
+  button.sg-button,
+  .sg-button--secondary,
+  button.sg-button--secondary,
+  a {
+    transition: none !important;
+  }
+}

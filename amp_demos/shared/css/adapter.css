@@ -1,0 +1,241 @@
+/* Adapter Layer - sg-* Classes Reimplemented with Amp Tokens */
+/* Maintains existing class names but uses Amp design tokens */
+
+/* Layout primitives */
+.sg-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem; /* 20px equivalent */
+}
+
+.sg-header,
+.sg-content {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  /* Remove glass blur and heavy shadows for clean Amp aesthetic */
+  box-shadow: none;
+  padding: 1rem;
+}
+
+.sg-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.sg-header h1 {
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  margin: 0;
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.sg-content {
+  padding: 2rem;
+}
+
+.sg-footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+/* Sections */
+.sg-welcome {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.sg-welcome h2 {
+  font-size: clamp(1.25rem, 1rem + 0.8vw, 1.5rem);
+  margin: 0 0 1rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.sg-welcome p {
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+/* Features grid */
+.sg-features {
+  display: grid;
+  gap: 2rem;
+  margin-top: 3rem;
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+@media (min-width: 640px) {
+  .sg-features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .sg-features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Cards */
+.sg-card {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  padding: 1.5rem;
+  max-width: 300px;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.sg-card:hover {
+  border-color: var(--accent-foreground);
+}
+
+.sg-card h3 {
+  font-size: 1.125rem;
+  color: var(--foreground);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.sg-card p {
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* Utilities */
+.sg-center {
+  text-align: center;
+}
+
+.sg-muted {
+  color: var(--muted-foreground);
+}
+
+.sg-glass {
+  /* Updated to use Amp tokens instead of glassmorphism */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+/* Spacing utilities */
+.sg-stack > * + * {
+  margin-top: 1rem;
+}
+
+.sg-mb-4 {
+  margin-bottom: 1rem;
+}
+
+.sg-mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.sg-p-4 {
+  padding: 1rem;
+}
+
+.sg-p-6 {
+  padding: 1.5rem;
+}
+
+/* Mobile-friendly content padding */
+@media (max-width: 480px) {
+  .sg-content {
+    padding: 1.5rem;
+  }
+  
+  .sg-container {
+    padding: 1rem;
+  }
+}
+
+/* Link styling */
+a {
+  color: var(--primary);
+  text-decoration: underline;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: var(--accent-foreground);
+}
+
+a:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* Button styling */
+.sg-button,
+button.sg-button {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-size: var(--text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.sg-button:hover,
+button.sg-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+
+.sg-button:focus,
+button.sg-button:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.sg-button:disabled,
+button.sg-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary button variant */
+.sg-button--secondary,
+button.sg-button--secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--secondary);
+}
+
+.sg-button--secondary:hover,
+button.sg-button--secondary:hover {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--muted);
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .sg-card,
+  .sg-button,
+  button.sg-button,
+  .sg-button--secondary,
+  button.sg-button--secondary,
+  a {
+    transition: none !important;
+  }
+}

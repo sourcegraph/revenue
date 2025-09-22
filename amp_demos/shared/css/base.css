@@ -1,0 +1,130 @@
+/* Base Styles and Reset */
+/* Minimal reset and base styles extracted from Amp's base.css */
+
+*,
+*::before,
+*::after,
+::backdrop,
+::file-selector-button {
+  box-sizing: border-box;
+  border: 0 solid var(--color-border, currentColor);
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+
+/* Selection styling */
+::selection {
+  background-color: color-mix(in srgb, var(--terminal-bright-yellow) 30%, transparent);
+}
+
+/* Code styling */
+code,
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  background: var(--muted);
+  color: var(--foreground);
+  border-radius: var(--radius-xs);
+  padding: 1px 2px;
+}
+
+/* Form elements */
+input,
+textarea {
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  color: var(--foreground);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Button styling */
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+[role='button']:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Keyboard shortcuts */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  background: var(--muted);
+  color: var(--foreground);
+  border-radius: var(--radius-xs);
+  outline: 1px solid var(--muted);
+  padding: 0 3px;
+  line-height: 1;
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+/* Highlight/mark styling */
+mark {
+  background: color-mix(in srgb, var(--terminal-yellow) 60%, transparent);
+  border-radius: var(--radius-xs);
+}
+
+mark[aria-current='true'] {
+  background: var(--terminal-yellow);
+}
+
+/* Utility classes for stretched links */
+.stretched-link-container {
+  position: relative;
+}
+
+.stretched-link::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  content: '';
+}
+
+.stretched-link-container [data-tooltip-trigger],
+.stretched-link-container [data-popover-trigger],
+.stretched-link-container button {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hidden utility */
+[hidden] {
+  display: none !important;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

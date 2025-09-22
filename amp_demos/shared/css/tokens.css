@@ -1,0 +1,228 @@
+/* Amp Design System Tokens */
+/* Extracted from amp/lib/css/palette.css and base.css */
+
+:root {
+  /* Core color tokens - Light Mode */
+  --background: #fafaf8;
+  --foreground: #0b0d0b;
+  --border: rgba(135, 139, 134, 0.2);
+  --muted: hsl(0 0% 92%);
+  --muted-foreground: hsl(0 0% 35%);
+  --popover: hsl(0 0% 95%);
+  --popover-foreground: hsl(0 0% 3%);
+  --card: rgba(11, 13, 11, 0.02);
+  --card-foreground: var(--foreground);
+  --input-border: hsla(120, 8%, 5%, 0.15);
+  --input-background: hsl(0, 0%, 99%);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: hsl(220 14% 85%);
+  --secondary-foreground: hsl(220 10% 20%);
+  --accent: rgba(11, 13, 11, 0.07);
+  --accent-foreground: var(--foreground);
+  --warning: hsl(41, 94%, 32%);
+  --warning-foreground: hsl(42, 76%, 77%);
+  --warning-border: hsl(41, 63%, 63%);
+  --destructive: hsl(0 62.8% 55%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --success: hsl(120, 58%, 40%);
+  --ring: var(--foreground);
+  --editor-background: hsl(240 5.9% 95%);
+  --editor-foreground: hsl(240 4.8% 10%);
+  --diff-addition-background: hsl(90deg 40% 90%);
+  --diff-removal-background: hsl(0 40% 90%);
+  --diff-addition-foreground: hsl(120 70% 25%);
+  --diff-removal-foreground: hsl(0 100% 30%);
+  --diff-meta-foreground: hsl(60, 70%, 35%);
+  --command-item-hover: var(--accent);
+  --command-item-hover-foreground: var(--accent-foreground);
+  --command-item-focus: var(--accent);
+  --command-item-focus-foreground: var(--accent-foreground);
+
+  /* Syntax highlighting */
+  --hljs-function: hsl(190, 80%, 40%);
+  --hljs-keyword: hsl(326, 70%, 45%);
+  --hljs-class: hsl(135, 60%, 35%);
+  --hljs-string: hsl(65, 70%, 35%);
+  --hljs-comment: hsl(231, 15%, 55%);
+  --hljs-number: hsl(265, 60%, 40%);
+
+  /* Terminal colors */
+  --terminal-black: hsl(230, 13%, 30%);
+  --terminal-red: hsl(355, 90%, 40%);
+  --terminal-green: hsl(120, 45%, 30%);
+  --terminal-yellow: hsl(39, 80%, 35%);
+  --terminal-blue: hsl(210, 90%, 45%);
+  --terminal-magenta: hsl(325, 65%, 45%);
+  --terminal-cyan: hsl(185, 65%, 30%);
+  --terminal-white: hsl(220, 8%, 20%);
+  --terminal-bright-black: hsl(230, 13%, 40%);
+  --terminal-bright-red: hsl(355, 85%, 45%);
+  --terminal-bright-green: hsl(120, 50%, 35%);
+  --terminal-bright-yellow: hsl(39, 85%, 40%);
+  --terminal-bright-blue: hsl(210, 100%, 50%);
+  --terminal-bright-magenta: hsl(325, 75%, 50%);
+  --terminal-bright-cyan: hsl(185, 58%, 35%);
+  --terminal-bright-white: hsl(220, 10%, 25%);
+
+  /* Typography scale */
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 0.75rem;
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 0.85rem;
+  --text-sm: 0.75rem;
+  --text-sm--line-height: 1rem;
+  --text-base: 0.8125rem;
+  --text-base--line-height: 1.25rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 6rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+
+  /* Border radius scale */
+  --radius: 0.5rem;
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Fonts */
+  --font-perfectly-nineties: 'Perfectly Nineties', serif;
+}
+
+/* Dark mode tokens */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: rgba(11, 13, 11, 1);
+    --foreground: rgba(246, 255, 245, 1);
+    --border: rgba(135, 139, 134, 0.2);
+    --muted: rgba(135, 139, 134, 0.1);
+    --muted-foreground: #9ca49c;
+    --popover: hsl(0 0% 2%);
+    --popover-foreground: hsl(0 0% 98%);
+    --card: rgba(246, 255, 245, 0.03);
+    --card-foreground: var(--foreground);
+    --input-border: rgba(246, 255, 245, 0.15);
+    --input-background: rgba(11, 13, 11, 1);
+    --primary: var(--foreground);
+    --primary-foreground: var(--background);
+    --secondary: hsl(90, 2%, 20%);
+    --secondary-foreground: var(--foreground);
+    --accent: rgba(246, 255, 245, 0.07);
+    --accent-foreground: var(--foreground);
+    --warning: hsl(41.2 99.8% 55.3%);
+    --warning-foreground: hsl(41, 88%, 13%);
+    --warning-border: hsl(41.2 99.8% 35%);
+    --destructive: hsl(0 62.8% 45.6%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --success: hsl(120, 58%, 40%);
+    --ring: var(--foreground);
+    --editor-background: hsl(240, 9%, 7%);
+    --editor-foreground: hsl(0, 0%, 73%);
+    --diff-addition-background: hsl(90deg 35% 22%);
+    --diff-removal-background: hsl(0 35% 22%);
+    --diff-addition-foreground: hsl(120 60% 55%);
+    --diff-removal-foreground: hsl(0 70% 60%);
+    --diff-meta-foreground: hsl(60, 70%, 50%);
+
+    --hljs-function: hsl(190, 80%, 70%);
+    --hljs-keyword: hsl(326, 100%, 74%);
+    --hljs-class: hsl(135, 94%, 65%);
+    --hljs-string: hsl(65, 92%, 76%);
+    --hljs-comment: hsl(231, 28%, 52%);
+    --hljs-number: hsl(265, 89%, 78%);
+
+    --terminal-black: hsl(230, 13%, 40%);
+    --terminal-red: hsl(355, 90%, 44%);
+    --terminal-green: hsl(120, 58%, 40%);
+    --terminal-yellow: hsl(39, 80%, 45%);
+    --terminal-blue: hsl(210, 90%, 53%);
+    --terminal-magenta: hsl(325, 73%, 70%);
+    --terminal-cyan: hsl(185, 73%, 35%);
+    --terminal-white: hsl(220, 8%, 72%);
+    --terminal-bright-black: hsl(230, 13%, 47%);
+    --terminal-bright-red: hsl(355, 85%, 52%);
+    --terminal-bright-green: hsl(120, 50%, 46%);
+    --terminal-bright-yellow: hsl(39, 85%, 55%);
+    --terminal-bright-blue: hsl(210, 100%, 63%);
+    --terminal-bright-magenta: hsl(325, 97%, 76%);
+    --terminal-bright-cyan: hsl(185, 58%, 42%);
+    --terminal-bright-white: hsl(220, 10%, 77%);
+  }
+}
+
+/* Data attribute based dark mode support */
+:root[data-theme="dark"] {
+  --background: rgba(11, 13, 11, 1);
+  --foreground: rgba(246, 255, 245, 1);
+  --border: rgba(135, 139, 134, 0.2);
+  --muted: rgba(135, 139, 134, 0.1);
+  --muted-foreground: #9ca49c;
+  --popover: hsl(0 0% 2%);
+  --popover-foreground: hsl(0 0% 98%);
+  --card: rgba(246, 255, 245, 0.03);
+  --card-foreground: var(--foreground);
+  --input-border: rgba(246, 255, 245, 0.15);
+  --input-background: rgba(11, 13, 11, 1);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: hsl(90, 2%, 20%);
+  --secondary-foreground: var(--foreground);
+  --accent: rgba(246, 255, 245, 0.07);
+  --accent-foreground: var(--foreground);
+  --warning: hsl(41.2 99.8% 55.3%);
+  --warning-foreground: hsl(41, 88%, 13%);
+  --warning-border: hsl(41.2 99.8% 35%);
+  --destructive: hsl(0 62.8% 45.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --success: hsl(120, 58%, 40%);
+  --ring: var(--foreground);
+  --editor-background: hsl(240, 9%, 7%);
+  --editor-foreground: hsl(0, 0%, 73%);
+  --diff-addition-background: hsl(90deg 35% 22%);
+  --diff-removal-background: hsl(0 35% 22%);
+  --diff-addition-foreground: hsl(120 60% 55%);
+  --diff-removal-foreground: hsl(0 70% 60%);
+  --diff-meta-foreground: hsl(60, 70%, 50%);
+
+  --hljs-function: hsl(190, 80%, 70%);
+  --hljs-keyword: hsl(326, 100%, 74%);
+  --hljs-class: hsl(135, 94%, 65%);
+  --hljs-string: hsl(65, 92%, 76%);
+  --hljs-comment: hsl(231, 28%, 52%);
+  --hljs-number: hsl(265, 89%, 78%);
+
+  --terminal-black: hsl(230, 13%, 40%);
+  --terminal-red: hsl(355, 90%, 44%);
+  --terminal-green: hsl(120, 58%, 40%);
+  --terminal-yellow: hsl(39, 80%, 45%);
+  --terminal-blue: hsl(210, 90%, 53%);
+  --terminal-magenta: hsl(325, 73%, 70%);
+  --terminal-cyan: hsl(185, 73%, 35%);
+  --terminal-white: hsl(220, 8%, 72%);
+  --terminal-bright-black: hsl(230, 13%, 47%);
+  --terminal-bright-red: hsl(355, 85%, 52%);
+  --terminal-bright-green: hsl(120, 50%, 46%);
+  --terminal-bright-yellow: hsl(39, 85%, 55%);
+  --terminal-bright-blue: hsl(210, 100%, 63%);
+  --terminal-bright-magenta: hsl(325, 97%, 76%);
+  --terminal-bright-cyan: hsl(185, 58%, 42%);
+  --terminal-bright-white: hsl(220, 10%, 77%);
+}
