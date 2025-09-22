@@ -7,11 +7,11 @@ set -e # Exit on any error
 # Get the real script directory (resolving symlinks) - macOS compatible
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+  DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
   SOURCE="$(readlink "$SOURCE")"
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
-SCRIPT_DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
 
 # Colors for output
 RED='\033[0;31m'
@@ -117,7 +117,19 @@ install_prerequisites() {
 # Install dependencies via Brewfile
 install_brewfile_dependencies() {
   cd "$SCRIPT_DIR"
-  if brew bundle install --quiet; then
+
+  # Ensure VS Code is managed by Homebrew and up to date before installing extensions
+  if [[ -d "/Applications/Visual Studio Code.app" ]]; then
+    if ! brew list --cask visual-studio-code >/dev/null 2>&1; then
+      print_info "Adopting existing Visual Studio Code installation..."
+      brew install --cask visual-studio-code --force --quiet || true
+    else
+      print_info "Updating Visual Studio Code..."
+      brew upgrade --cask visual-studio-code --quiet || true
+    fi
+  fi
+
+  if brew bundle install --force --quiet; then
     print_success "Brewfile dependencies installed successfully"
   else
     print_error "Failed to install Brewfile dependencies"
@@ -133,9 +145,20 @@ update_brewfile_dependencies() {
   # Upgrade outdated formulae
   brew upgrade
 
+  # Ensure VS Code is managed by Homebrew and up to date before installing extensions
+  if [[ -d "/Applications/Visual Studio Code.app" ]]; then
+    if ! brew list --cask visual-studio-code >/dev/null 2>&1; then
+      print_info "Adopting existing Visual Studio Code installation..."
+      brew install --cask visual-studio-code --force --quiet || true
+    else
+      print_info "Ensuring Visual Studio Code is up to date..."
+      brew upgrade --cask visual-studio-code --quiet || true
+    fi
+  fi
+
   # Install/update via Brewfile
   cd "$SCRIPT_DIR"
-  if brew bundle install --quiet; then
+  if brew bundle install --force --quiet; then
     print_success "Dependencies updated successfully"
   else
     print_error "Failed to update dependencies"
@@ -208,7 +231,7 @@ setup_global_command() {
     shell_type=$(detect_shell)
     local profile_path
     profile_path=$(get_shell_profile "$shell_type")
-    
+
     print_warning "$HOME/.local/bin is not in your PATH"
     print_info "Add this line to your shell profile ($(basename "$profile_path")):"
     echo "    export PATH=\"\$HOME/.local/bin:\$PATH\""
@@ -222,46 +245,46 @@ setup_global_command() {
 detect_shell() {
   local current_shell
   current_shell=$(basename "$SHELL" 2>/dev/null || echo "unknown")
-  
+
   case "$current_shell" in
-    zsh|bash)
-      echo "$current_shell"
-      ;;
-    *)
-      # Fallback: check what shell is actually running this script
-      if [[ -n "$ZSH_VERSION" ]]; then
-        echo "zsh"
-      elif [[ -n "$BASH_VERSION" ]]; then
-        echo "bash"
-      else
-        # Default to zsh since it's macOS default since 10.15
-        echo "zsh"
-      fi
-      ;;
+  zsh | bash)
+    echo "$current_shell"
+    ;;
+  *)
+    # Fallback: check what shell is actually running this script
+    if [[ -n "$ZSH_VERSION" ]]; then
+      echo "zsh"
+    elif [[ -n "$BASH_VERSION" ]]; then
+      echo "bash"
+    else
+      # Default to zsh since it's macOS default since 10.15
+      echo "zsh"
+    fi
+    ;;
   esac
 }
 
 # Get shell profile path based on detected shell
 get_shell_profile() {
   local shell_type="$1"
-  
+
   case "$shell_type" in
-    zsh)
-      echo "$HOME/.zshrc"
-      ;;
-    bash)
-      # Check for existing bash profile files, prefer .bash_profile on macOS
-      if [[ -f "$HOME/.bash_profile" ]]; then
-        echo "$HOME/.bash_profile"
-      elif [[ -f "$HOME/.bashrc" ]]; then
-        echo "$HOME/.bashrc"
-      else
-        echo "$HOME/.bash_profile"  # Create .bash_profile as default on macOS
-      fi
-      ;;
-    *)
-      echo "$HOME/.profile"  # Generic fallback
-      ;;
+  zsh)
+    echo "$HOME/.zshrc"
+    ;;
+  bash)
+    # Check for existing bash profile files, prefer .bash_profile on macOS
+    if [[ -f "$HOME/.bash_profile" ]]; then
+      echo "$HOME/.bash_profile"
+    elif [[ -f "$HOME/.bashrc" ]]; then
+      echo "$HOME/.bashrc"
+    else
+      echo "$HOME/.bash_profile" # Create .bash_profile as default on macOS
+    fi
+    ;;
+  *)
+    echo "$HOME/.profile" # Generic fallback
+    ;;
   esac
 }
 
@@ -323,17 +346,17 @@ update_repository() {
 # Initialize development environment
 init_environment() {
   local installer_args=("$@")
-  
+
   print_info "Delegating to bootstrap installer for complete setup..."
   if [[ ${#installer_args[@]} -gt 0 ]]; then
     print_info "Passing arguments: ${installer_args[*]}"
   fi
   echo ""
-  
+
   # Use local install.sh if available, otherwise download it
   local local_installer="$SCRIPT_DIR/install.sh"
   local installer_url="https://raw.githubusercontent.com/sourcegraph/revenue/main/install.sh"
-  
+
   if [[ -f "$local_installer" ]]; then
     print_info "Using local installer..."
     if bash "$local_installer" "${installer_args[@]}"; then
