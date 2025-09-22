@@ -214,14 +214,14 @@ restart_demo() {
   local framework="$2"
 
   stop_demo "$language" "$framework"
-  sleep 1
+  sleep 3
   start_demo "$language" "$framework"
 }
 
 # Restart all demos
 restart_all() {
   stop_all
-  sleep 2
+  sleep 5
   start_all
 }
 
