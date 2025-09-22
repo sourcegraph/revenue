@@ -23,26 +23,6 @@ check_overmind() {
   fi
 }
 
-# Discover all demo applications (those with Procfile)
-discover_apps() {
-  local apps=()
-  for lang_dir in */; do
-    lang=$(basename "$lang_dir")
-    if [[ "$lang" == "." || "$lang" == ".." ]]; then
-      continue
-    fi
-    if [[ -d "$lang_dir" ]]; then
-      for framework_dir in "$lang_dir"*/; do
-        if [[ -d "$framework_dir" && -f "$framework_dir/Procfile" ]]; then
-          framework=$(basename "$framework_dir")
-          apps+=("$lang:$framework")
-        fi
-      done
-    fi
-  done
-  printf '%s\n' "${apps[@]}"
-}
-
 # Get port from .env file
 get_port() {
   local app_dir="$1"
@@ -57,6 +37,45 @@ get_port() {
 is_running() {
   local app_dir="$1"
   [[ -S "$app_dir/.overmind.sock" ]]
+}
+
+# Get comprehensive info about a single app
+# Returns: language|framework|app_dir|port|running_status
+get_app_info() {
+  local language="$1"
+  local framework="$2"
+  local app_dir="$language/$framework"
+  local port=""
+  local running_status="stopped"
+
+  if [[ -f "$app_dir/.env" ]]; then
+    port=$(get_port "$app_dir")
+  fi
+
+  if is_running "$app_dir"; then
+    running_status="running"
+  fi
+
+  echo "$language|$framework|$app_dir|$port|$running_status"
+}
+
+# Get info for all discovered apps
+# Each line: language|framework|app_dir|port|running_status
+get_all_apps_info() {
+  for lang_dir in */; do
+    lang=$(basename "$lang_dir")
+    if [[ "$lang" == "." || "$lang" == ".." ]]; then
+      continue
+    fi
+    if [[ -d "$lang_dir" ]]; then
+      for framework_dir in "$lang_dir"*/; do
+        if [[ -d "$framework_dir" && -f "$framework_dir/Procfile" ]]; then
+          framework=$(basename "$framework_dir")
+          get_app_info "$lang" "$framework"
+        fi
+      done
+    fi
+  done
 }
 
 # Start a single demo
@@ -75,9 +94,12 @@ start_demo() {
     return 1
   fi
 
-  if is_running "$app_dir"; then
-    local port
-    port=$(get_port "$app_dir")
+  # Get current app info
+  local app_info
+  app_info=$(get_app_info "$language" "$framework")
+  IFS='|' read -r _ _ _ port running_status <<<"$app_info"
+
+  if [[ "$running_status" == "running" ]]; then
     print_warning "$language/$framework is already running"
     [[ -n "$port" ]] && print_info "Available at: http://localhost:$port"
     return 0
@@ -100,9 +122,10 @@ start_demo() {
   # Simple wait for overmind socket to appear
   local count=0
   while [[ $count -lt 15 ]]; do
-    if is_running "$app_dir"; then
-      local port
-      port=$(get_port "$app_dir")
+    app_info=$(get_app_info "$language" "$framework")
+    IFS='|' read -r _ _ _ port running_status <<<"$app_info"
+
+    if [[ "$running_status" == "running" ]]; then
       print_success "Started $language/$framework"
       [[ -n "$port" ]] && print_info "Available at: http://localhost:$port"
       return 0
@@ -121,7 +144,12 @@ stop_demo() {
   local framework="$2"
   local app_dir="$language/$framework"
 
-  if ! is_running "$app_dir"; then
+  # Get current app info
+  local app_info
+  app_info=$(get_app_info "$language" "$framework")
+  IFS='|' read -r _ _ _ port running_status <<<"$app_info"
+
+  if [[ "$running_status" != "running" ]]; then
     print_warning "$language/$framework is not running"
     return 0
   fi
@@ -136,28 +164,27 @@ stop_demo() {
 
 # Start all demos
 start_all() {
-  local apps=()
-  while IFS= read -r line; do
-    [[ -n "$line" ]] && apps+=("$line")
-  done < <(discover_apps)
-
-  if [[ ${#apps[@]} -eq 0 ]]; then
-    print_warning "No demo applications found"
-    return 0
-  fi
-
-  print_info "Starting all demo applications..."
+  local app_count=0
   local started=0
   local failed=0
 
-  for app in "${apps[@]}"; do
-    IFS=':' read -r language framework <<<"$app"
+  print_info "Starting all demo applications..."
+
+  while IFS='|' read -r language framework app_dir port running_status; do
+    [[ -z "$language" ]] && continue
+    app_count=$((app_count + 1))
+
     if start_demo "$language" "$framework"; then
       started=$((started + 1))
     else
       failed=$((failed + 1))
     fi
-  done
+  done < <(get_all_apps_info)
+
+  if [[ $app_count -eq 0 ]]; then
+    print_warning "No demo applications found"
+    return 0
+  fi
 
   print_success "Started $started demo applications"
   [[ $failed -gt 0 ]] && print_warning "$failed demo applications failed to start"
@@ -165,21 +192,20 @@ start_all() {
 
 # Stop all demos
 stop_all() {
-  local apps=()
-  while IFS= read -r line; do
-    [[ -n "$line" ]] && apps+=("$line")
-  done < <(discover_apps)
+  local app_count=0
 
-  if [[ ${#apps[@]} -eq 0 ]]; then
+  print_info "Stopping all demo applications..."
+
+  while IFS='|' read -r language framework app_dir port running_status; do
+    [[ -z "$language" ]] && continue
+    app_count=$((app_count + 1))
+    stop_demo "$language" "$framework"
+  done < <(get_all_apps_info)
+
+  if [[ $app_count -eq 0 ]]; then
     print_info "No demo applications found"
     return 0
   fi
-
-  print_info "Stopping all demo applications..."
-  for app in "${apps[@]}"; do
-    IFS=':' read -r language framework <<<"$app"
-    stop_demo "$language" "$framework"
-  done
 }
 
 # Restart a single demo
@@ -203,36 +229,31 @@ restart_all() {
 list_demos() {
   print_info "Available demo applications:"
 
-  discover_apps | while IFS=':' read -r language framework; do
-    local app_dir="$language/$framework"
-    local port
-    port=$(get_port "$app_dir")
+  while IFS='|' read -r language framework app_dir port running_status; do
+    [[ -z "$language" ]] && continue
 
-    if is_running "$app_dir"; then
-      local url_info=""
-      [[ -n "$port" ]] && url_info=" - http://localhost:$port"
-      printf "  %-20s %s%s\n" "$language/$framework" "(running)" "$url_info"
-    else
-      printf "  %-20s %s\n" "$language/$framework" "(stopped)"
+    local url_info=""
+    if [[ "$running_status" == "running" && -n "$port" ]]; then
+      url_info=" - http://localhost:$port"
     fi
-  done
+
+    printf "  %-20s %s%s\n" "$language/$framework" "($running_status)" "$url_info"
+  done < <(get_all_apps_info)
 }
 
 # List only running demos
 list_running() {
   print_info "Running demo applications:"
 
-  discover_apps | while IFS=':' read -r language framework; do
-    local app_dir="$language/$framework"
-    local port
-    port=$(get_port "$app_dir")
+  while IFS='|' read -r language framework app_dir port running_status; do
+    [[ -z "$language" ]] && continue
 
-    if is_running "$app_dir"; then
+    if [[ "$running_status" == "running" ]]; then
       local url_info=""
       [[ -n "$port" ]] && url_info=" - http://localhost:$port"
       printf "  %-20s %s%s\n" "$language/$framework" "(running)" "$url_info"
     fi
-  done
+  done < <(get_all_apps_info)
 }
 
 # Show logs for a demo - use overmind's native echo command
@@ -246,7 +267,12 @@ show_logs() {
     return 1
   fi
 
-  if ! is_running "$app_dir"; then
+  # Get current app info
+  local app_info
+  app_info=$(get_app_info "$language" "$framework")
+  IFS='|' read -r _ _ _ port running_status <<<"$app_info"
+
+  if [[ "$running_status" != "running" ]]; then
     print_error "$language/$framework is not running"
     return 1
   fi
@@ -266,13 +292,82 @@ connect_demo() {
     return 1
   fi
 
-  if ! is_running "$app_dir"; then
+  # Get current app info
+  local app_info
+  app_info=$(get_app_info "$language" "$framework")
+  IFS='|' read -r _ _ _ port running_status <<<"$app_info"
+
+  if [[ "$running_status" != "running" ]]; then
     print_error "$language/$framework is not running"
     return 1
   fi
 
   print_info "Connecting to $language/$framework..."
   (cd "$app_dir" && overmind connect web)
+}
+
+# Open a single demo in browser
+open_demo() {
+  local language="$1"
+  local framework="$2"
+  local app_dir="$language/$framework"
+
+  if [[ -z "$language" || -z "$framework" ]]; then
+    print_error "Usage: demo open <language> <framework>"
+    return 1
+  fi
+
+  # Get current app info
+  local app_info
+  app_info=$(get_app_info "$language" "$framework")
+  IFS='|' read -r _ _ _ port running_status <<<"$app_info"
+
+  if [[ "$running_status" != "running" ]]; then
+    print_error "$language/$framework is not running"
+    return 1
+  fi
+
+  if [[ -z "$port" ]]; then
+    print_error "No port configured for $language/$framework"
+    return 1
+  fi
+
+  print_info "Opening $language/$framework in browser..."
+  open "http://localhost:$port"
+}
+
+# Open all running demos in browser
+open_all() {
+  local app_count=0
+  local opened=0
+
+  print_info "Opening all running demo applications in browser..."
+
+  while IFS='|' read -r language framework app_dir port running_status; do
+    [[ -z "$language" ]] && continue
+    app_count=$((app_count + 1))
+
+    if [[ "$running_status" == "running" ]]; then
+      if [[ -n "$port" ]]; then
+        print_info "Opening $language/$framework..."
+        open "http://localhost:$port"
+        opened=$((opened + 1))
+      else
+        print_warning "No port configured for $language/$framework"
+      fi
+    fi
+  done < <(get_all_apps_info)
+
+  if [[ $app_count -eq 0 ]]; then
+    print_info "No demo applications found"
+    return 0
+  fi
+
+  if [[ $opened -eq 0 ]]; then
+    print_warning "No running demo applications found to open"
+  else
+    print_success "Opened $opened demo applications in browser"
+  fi
 }
 
 # Force cleanup all processes and sockets
@@ -287,10 +382,8 @@ clean_all() {
 
   print_warning "Cleaning up all demo applications..."
 
-  discover_apps | while IFS=':' read -r language framework; do
-    local app_dir="$language/$framework"
-    local port
-    port=$(get_port "$app_dir")
+  while IFS='|' read -r language framework app_dir port running_status; do
+    [[ -z "$language" ]] && continue
 
     # Kill overmind sessions
     if [[ -S "$app_dir/.overmind.sock" ]]; then
@@ -315,7 +408,7 @@ clean_all() {
         fi
       fi
     fi
-  done
+  done < <(get_all_apps_info)
 
   # Clean up any remaining socket files
   find . -name ".overmind.sock" -delete 2>/dev/null || true
@@ -370,6 +463,8 @@ show_usage() {
   echo "  demo restart all                    Restart all running applications"
   echo "  demo logs <language> <framework>    Show logs from a running demo"
   echo "  demo connect <language> <framework> Connect to a running demo"
+  echo "  demo open <language> <framework>    Open a demo application in browser"
+  echo "  demo open all                       Open all running demos in browser"
   echo "  demo list                           List all demos with status"
   echo "  demo running                        List only running demos"
   echo "  demo clean --confirm                Force cleanup all processes and sockets"
@@ -382,6 +477,8 @@ show_usage() {
   echo "  demo stop javascript react"
   echo "  demo restart python flask"
   echo "  demo logs python flask"
+  echo "  demo open python flask"
+  echo "  demo open all"
   echo ""
 }
 
@@ -419,6 +516,13 @@ main() {
     ;;
   connect)
     connect_demo "$1" "$2"
+    ;;
+  open)
+    if [[ "$1" == "all" ]]; then
+      open_all
+    else
+      open_demo "$1" "$2"
+    fi
     ;;
   list)
     list_demos

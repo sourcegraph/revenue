@@ -98,6 +98,8 @@ cd amp_demos
 ```bash
 ./demo logs <language> <framework>    # View logs from a running demo (Ctrl+C to exit)
 ./demo connect <language> <framework> # Connect to a running demo session
+./demo open <language> <framework>    # Open a running demo in browser
+./demo open all                       # Open all running demos in browser
 ```
 
 ### List Demos
@@ -144,6 +146,12 @@ named `<language>-<framework>`
 
 # Connect to running demo
 ./demo connect python flask
+
+# Open a demo in browser
+./demo open python flask
+
+# Open all running demos in browser
+./demo open all
 
 # Stop all demos
 ./demo stop all

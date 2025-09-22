@@ -10,6 +10,8 @@ Demo management:
 - `./demo list` - List available demos and status
 - `./demo logs <language> <framework>` - View logs from running demo
 - `./demo connect <language> <framework>` - Connect to running demo session
+- `./demo open <language> <framework>` - Open a running demo in browser
+- `./demo open all` - Open all running demos in browser
 
 Framework-specific commands:
 
