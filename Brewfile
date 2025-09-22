@@ -13,7 +13,6 @@ brew "tree"
 brew "yq"
 
 # Applications
-cask "github"
 cask "ghostty"
 cask "jetbrains-toolbox"
 cask "temurin"
