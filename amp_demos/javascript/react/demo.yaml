@@ -1,5 +1,0 @@
-language: javascript
-framework: react
-port: 8082
-install: pnpm install --silent
-start: pnpm start

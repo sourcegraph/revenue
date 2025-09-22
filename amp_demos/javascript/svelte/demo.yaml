@@ -1,5 +1,0 @@
-language: javascript
-framework: svelte
-port: 8083
-install: pnpm install
-start: pnpm run dev
