@@ -316,7 +316,7 @@ install_prerequisites() {
 install_brewfile_dependencies() {
   cd "$repo_dir"
   print_info "Installing development tools and applications..."
-  if brew bundle install --quiet; then
+  if brew bundle install --quiet --force; then
     print_success "Development tools installed successfully"
   else
     print_error "Failed to install development tools"
