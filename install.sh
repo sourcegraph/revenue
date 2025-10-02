@@ -59,7 +59,7 @@ parse_arguments() {
         repo_dir="$2"
         shift 2
         ;;
-      --help|-h)
+      --help | -h)
         print_info "Sourcegraph Revenue Team Workstation Setup"
         echo ""
         print_info "Usage: $0 [OPTIONS]"
@@ -80,7 +80,7 @@ parse_arguments() {
 
   # Expand tilde to home directory if present
   repo_dir="${repo_dir/#\~/$HOME}"
-  
+
   # Convert to absolute path if relative
   if [[ "$repo_dir" != /* ]]; then
     repo_dir="$(pwd)/$repo_dir"
@@ -157,7 +157,7 @@ check_github_access() {
 # Clone or update the repository
 setup_repository() {
   local repo_url="https://github.com/sourcegraph/revenue.git"
-  
+
   # Create parent directory if it doesn't exist
   local parent_dir
   parent_dir="$(dirname "$repo_dir")"
@@ -232,20 +232,20 @@ detect_shell() {
   current_shell=$(basename "$SHELL" 2>/dev/null || echo "unknown")
 
   case "$current_shell" in
-  zsh | bash)
-    echo "$current_shell"
-    ;;
-  *)
-    # Fallback: check what shell is actually running this script
-    if [[ -n "$ZSH_VERSION" ]]; then
-      echo "zsh"
-    elif [[ -n "$BASH_VERSION" ]]; then
-      echo "bash"
-    else
-      # Default to zsh since it's macOS default since 10.15
-      echo "zsh"
-    fi
-    ;;
+    zsh | bash)
+      echo "$current_shell"
+      ;;
+    *)
+      # Fallback: check what shell is actually running this script
+      if [[ -n "$ZSH_VERSION" ]]; then
+        echo "zsh"
+      elif [[ -n "$BASH_VERSION" ]]; then
+        echo "bash"
+      else
+        # Default to zsh since it's macOS default since 10.15
+        echo "zsh"
+      fi
+      ;;
   esac
 }
 
@@ -254,22 +254,22 @@ get_shell_profile() {
   local shell_type="$1"
 
   case "$shell_type" in
-  zsh)
-    echo "$HOME/.zshrc"
-    ;;
-  bash)
-    # Check for existing bash profile files, prefer .bash_profile on macOS
-    if [[ -f "$HOME/.bash_profile" ]]; then
-      echo "$HOME/.bash_profile"
-    elif [[ -f "$HOME/.bashrc" ]]; then
-      echo "$HOME/.bashrc"
-    else
-      echo "$HOME/.bash_profile" # Create .bash_profile as default on macOS
-    fi
-    ;;
-  *)
-    echo "$HOME/.profile" # Generic fallback
-    ;;
+    zsh)
+      echo "$HOME/.zshrc"
+      ;;
+    bash)
+      # Check for existing bash profile files, prefer .bash_profile on macOS
+      if [[ -f "$HOME/.bash_profile" ]]; then
+        echo "$HOME/.bash_profile"
+      elif [[ -f "$HOME/.bashrc" ]]; then
+        echo "$HOME/.bashrc"
+      else
+        echo "$HOME/.bash_profile" # Create .bash_profile as default on macOS
+      fi
+      ;;
+    *)
+      echo "$HOME/.profile" # Generic fallback
+      ;;
   esac
 }
 
@@ -294,6 +294,7 @@ install_prerequisites() {
   if ! command_exists "brew"; then
     print_info "Installing Homebrew..."
     print_info "You may be prompted for your macOS password..."
+    print_info "Password output is masked. You won't see any characters displayed when entering it, if prompted."
     if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
       print_success "Homebrew installed successfully"
 
