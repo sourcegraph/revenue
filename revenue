@@ -385,6 +385,36 @@ init_environment() {
   fi
 }
 
+# Trust and install mise dependencies
+trust_and_install_mise() {
+  # Check if mise is available
+  if ! command -v mise >/dev/null 2>&1; then
+    print_warning "mise is not available on PATH; skipping mise trust/install steps"
+    print_info "Ensure mise is installed and available on PATH, then run 'revenue update'"
+    return 0
+  fi
+
+  cd "$SCRIPT_DIR"
+  print_info "Trusting mise configurations in repository..."
+  
+  find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print | while IFS= read -r config_file; do
+    mise trust "$config_file" >/dev/null 2>&1 || true
+  done
+  
+  print_success "Trusted all mise configurations in repository"
+
+  print_info "Installing mise dependencies..."
+
+  find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print |
+    xargs -n1 dirname |
+    sort -u |
+    while IFS= read -r config_dir; do
+      (cd "$config_dir" && mise install >/dev/null 2>&1) || true
+    done
+
+  print_success "Installed mise dependencies"
+}
+
 # Update development environment
 update_environment() {
   check_macos
@@ -392,6 +422,7 @@ update_environment() {
   install_prerequisites # Ensure Homebrew is still available
   update_brewfile_dependencies
   update_amp_cli
+  trust_and_install_mise
   print_success "Environment update completed!"
 }
 

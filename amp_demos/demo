@@ -117,12 +117,6 @@ start_demo() {
     export TMPDIR="$REPO_ROOT/.tmp"
     mkdir -p "$TMPDIR"
 
-    # Use mise to ensure dependencies are available
-    if [[ -f ".mise.toml" || -f ".tool-versions" ]]; then
-      mise trust >/dev/null 2>&1 || true
-      mise install >/dev/null 2>&1 || true
-    fi
-
     # Start overmind in daemon mode - let it handle everything
     overmind start -D
   )

@@ -449,15 +449,27 @@ configure_mise() {
     source_shell_profile
   fi
 
-  # Trust the repository's .mise.toml to avoid warning messages
+  # Trust all mise configs in the repository to avoid warning messages
   cd "$repo_dir"
-  if [[ -f ".mise.toml" ]]; then
-    if mise trust >/dev/null 2>&1; then
-      print_success "Trusted .mise.toml configuration"
-    else
-      print_info "Note: Run 'mise trust' in $repo_dir to avoid warning messages"
-    fi
-  fi
+  print_info "Trusting mise configurations in repository..."
+
+  find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print | while IFS= read -r config_file; do
+    mise trust "$config_file" >/dev/null 2>&1 || true
+  done
+
+  print_success "Trusted all mise configurations in repository"
+
+  # Install all mise dependencies in each directory with a mise config (deduplicated)
+  print_info "Installing mise dependencies..."
+
+  find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print |
+    xargs -n1 dirname |
+    sort -u |
+    while IFS= read -r config_dir; do
+      (cd "$config_dir" && mise install >/dev/null 2>&1) || true
+    done
+
+  print_success "Installed mise dependencies"
 }
 
 # Run the main installer
