@@ -1,0 +1,24 @@
+name: Demo - JavaScript Svelte
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "amp_demos/javascript/svelte/**"
+      - ".github/workflows/demo-javascript-svelte.yml"
+      - ".github/workflows/_demo-ci.yml"
+      - ".github/actions/setup-mise/**"
+  pull_request:
+    paths:
+      - "amp_demos/javascript/svelte/**"
+      - ".github/workflows/demo-javascript-svelte.yml"
+      - ".github/workflows/_demo-ci.yml"
+      - ".github/actions/setup-mise/**"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_demo-ci.yml
+    with:
+      demo_path: amp_demos/javascript/svelte
+      language: javascript
+      framework: svelte

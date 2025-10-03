@@ -1,0 +1,31 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install dependencies with uv
+    cmds:
+      - uv sync
+
+  lint:
+    desc: Lint the code
+    deps: [install]
+    cmds:
+      - echo "No linter configured, skipping lint step"
+
+  build:
+    desc: Build the application
+    deps: [install]
+    cmds:
+      - echo "Flask is interpreted, no build step needed"
+
+  test:
+    desc: Run tests
+    deps: [install]
+    cmds:
+      - echo "No tests configured, skipping test step"
+
+  dev:
+    desc: Start Flask development server
+    deps: [install]
+    cmds:
+      - uv run python main.py

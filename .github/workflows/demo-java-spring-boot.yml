@@ -1,0 +1,24 @@
+name: Demo - Java Spring Boot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "amp_demos/java/spring-boot/**"
+      - ".github/workflows/demo-java-spring-boot.yml"
+      - ".github/workflows/_demo-ci.yml"
+      - ".github/actions/setup-mise/**"
+  pull_request:
+    paths:
+      - "amp_demos/java/spring-boot/**"
+      - ".github/workflows/demo-java-spring-boot.yml"
+      - ".github/workflows/_demo-ci.yml"
+      - ".github/actions/setup-mise/**"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_demo-ci.yml
+    with:
+      demo_path: amp_demos/java/spring-boot
+      language: java
+      framework: spring-boot

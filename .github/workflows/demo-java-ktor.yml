@@ -1,0 +1,24 @@
+name: Demo - Java Ktor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "amp_demos/java/ktor/**"
+      - ".github/workflows/demo-java-ktor.yml"
+      - ".github/workflows/_demo-ci.yml"
+      - ".github/actions/setup-mise/**"
+  pull_request:
+    paths:
+      - "amp_demos/java/ktor/**"
+      - ".github/workflows/demo-java-ktor.yml"
+      - ".github/workflows/_demo-ci.yml"
+      - ".github/actions/setup-mise/**"
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_demo-ci.yml
+    with:
+      demo_path: amp_demos/java/ktor
+      language: java
+      framework: ktor

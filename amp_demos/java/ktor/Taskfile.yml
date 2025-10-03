@@ -1,0 +1,27 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Download dependencies
+    cmds:
+      - ./gradlew dependencies
+
+  lint:
+    desc: Lint the code
+    cmds:
+      - echo "No linter configured, skipping lint step"
+
+  build:
+    desc: Build the application
+    cmds:
+      - ./gradlew build -x test
+
+  test:
+    desc: Run tests
+    cmds:
+      - ./gradlew test
+
+  dev:
+    desc: Start Ktor development server
+    cmds:
+      - ./gradlew run
