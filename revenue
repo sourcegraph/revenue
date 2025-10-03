@@ -174,6 +174,11 @@ update_brewfile_dependencies() {
 install_amp_cli() {
   if ! command_exists "amp"; then
     print_info "Installing Amp CLI..."
+
+    # Use repository temp directory to avoid system temp permission issues
+    export TMPDIR="$SCRIPT_DIR/.tmp"
+    mkdir -p "$TMPDIR"
+
     if curl -fsSL https://ampcode.com/install.sh | bash; then
       print_success "Amp CLI: installed successfully"
     else
@@ -247,20 +252,20 @@ detect_shell() {
   current_shell=$(basename "$SHELL" 2>/dev/null || echo "unknown")
 
   case "$current_shell" in
-  zsh | bash)
-    echo "$current_shell"
-    ;;
-  *)
-    # Fallback: check what shell is actually running this script
-    if [[ -n "$ZSH_VERSION" ]]; then
-      echo "zsh"
-    elif [[ -n "$BASH_VERSION" ]]; then
-      echo "bash"
-    else
-      # Default to zsh since it's macOS default since 10.15
-      echo "zsh"
-    fi
-    ;;
+    zsh | bash)
+      echo "$current_shell"
+      ;;
+    *)
+      # Fallback: check what shell is actually running this script
+      if [[ -n "$ZSH_VERSION" ]]; then
+        echo "zsh"
+      elif [[ -n "$BASH_VERSION" ]]; then
+        echo "bash"
+      else
+        # Default to zsh since it's macOS default since 10.15
+        echo "zsh"
+      fi
+      ;;
   esac
 }
 
@@ -269,22 +274,22 @@ get_shell_profile() {
   local shell_type="$1"
 
   case "$shell_type" in
-  zsh)
-    echo "$HOME/.zshrc"
-    ;;
-  bash)
-    # Check for existing bash profile files, prefer .bash_profile on macOS
-    if [[ -f "$HOME/.bash_profile" ]]; then
-      echo "$HOME/.bash_profile"
-    elif [[ -f "$HOME/.bashrc" ]]; then
-      echo "$HOME/.bashrc"
-    else
-      echo "$HOME/.bash_profile" # Create .bash_profile as default on macOS
-    fi
-    ;;
-  *)
-    echo "$HOME/.profile" # Generic fallback
-    ;;
+    zsh)
+      echo "$HOME/.zshrc"
+      ;;
+    bash)
+      # Check for existing bash profile files, prefer .bash_profile on macOS
+      if [[ -f "$HOME/.bash_profile" ]]; then
+        echo "$HOME/.bash_profile"
+      elif [[ -f "$HOME/.bashrc" ]]; then
+        echo "$HOME/.bashrc"
+      else
+        echo "$HOME/.bash_profile" # Create .bash_profile as default on macOS
+      fi
+      ;;
+    *)
+      echo "$HOME/.profile" # Generic fallback
+      ;;
   esac
 }
 
@@ -395,34 +400,34 @@ main() {
   local action="${1:-}"
 
   case "$action" in
-  "init")
-    shift # Remove 'init' from arguments
-    init_environment "$@"
-    ;;
-  "update")
-    update_environment
-    ;;
-  "demo")
-    # Delegate to amp_demos/demo with remaining arguments
-    shift # Remove 'demo' from arguments
-    cd "$SCRIPT_DIR/amp_demos"
-    exec bash "./demo" "$@"
-    ;;
-  "help" | "-h" | "--help")
-    show_help
-    ;;
-  "")
-    echo -e "\033[0;31m✗ No command specified.\033[0m"
-    echo ""
-    show_help
-    exit 1
-    ;;
-  *)
-    echo -e "\033[0;31m✗ Unknown command: $action\033[0m"
-    echo ""
-    show_help
-    exit 1
-    ;;
+    "init")
+      shift # Remove 'init' from arguments
+      init_environment "$@"
+      ;;
+    "update")
+      update_environment
+      ;;
+    "demo")
+      # Delegate to amp_demos/demo with remaining arguments
+      shift # Remove 'demo' from arguments
+      cd "$SCRIPT_DIR/amp_demos"
+      exec bash "./demo" "$@"
+      ;;
+    "help" | "-h" | "--help")
+      show_help
+      ;;
+    "")
+      echo -e "\033[0;31m✗ No command specified.\033[0m"
+      echo ""
+      show_help
+      exit 1
+      ;;
+    *)
+      echo -e "\033[0;31m✗ Unknown command: $action\033[0m"
+      echo ""
+      show_help
+      exit 1
+      ;;
   esac
 }
 

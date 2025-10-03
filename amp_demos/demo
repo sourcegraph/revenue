@@ -2,6 +2,9 @@
 
 set -e
 
+# Get repository root (parent of amp_demos directory)
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -109,6 +112,10 @@ start_demo() {
 
   (
     cd "$app_dir"
+
+    # Use repository temp directory to avoid system temp permission issues
+    export TMPDIR="$REPO_ROOT/.tmp"
+    mkdir -p "$TMPDIR"
 
     # Use mise to ensure dependencies are available
     if [[ -f ".mise.toml" || -f ".tool-versions" ]]; then
@@ -490,60 +497,60 @@ main() {
   shift || true
 
   case "$command" in
-  start)
-    if [[ "$1" == "all" ]]; then
-      start_all
-    else
-      start_demo "$1" "$2"
-    fi
-    ;;
-  stop)
-    if [[ "$1" == "all" ]]; then
-      stop_all
-    else
-      stop_demo "$1" "$2"
-    fi
-    ;;
-  restart)
-    if [[ "$1" == "all" ]]; then
-      restart_all
-    else
-      restart_demo "$1" "$2"
-    fi
-    ;;
-  logs)
-    show_logs "$1" "$2"
-    ;;
-  connect)
-    connect_demo "$1" "$2"
-    ;;
-  open)
-    if [[ "$1" == "all" ]]; then
-      open_all
-    else
-      open_demo "$1" "$2"
-    fi
-    ;;
-  list)
-    list_demos
-    ;;
-  running)
-    list_running
-    ;;
-  clean)
-    clean_all "$1"
-    ;;
-  reset)
-    reset_all "$1"
-    ;;
-  help | --help | -h | "")
-    show_usage
-    ;;
-  *)
-    print_error "Unknown command: $command"
-    show_usage
-    exit 1
-    ;;
+    start)
+      if [[ "$1" == "all" ]]; then
+        start_all
+      else
+        start_demo "$1" "$2"
+      fi
+      ;;
+    stop)
+      if [[ "$1" == "all" ]]; then
+        stop_all
+      else
+        stop_demo "$1" "$2"
+      fi
+      ;;
+    restart)
+      if [[ "$1" == "all" ]]; then
+        restart_all
+      else
+        restart_demo "$1" "$2"
+      fi
+      ;;
+    logs)
+      show_logs "$1" "$2"
+      ;;
+    connect)
+      connect_demo "$1" "$2"
+      ;;
+    open)
+      if [[ "$1" == "all" ]]; then
+        open_all
+      else
+        open_demo "$1" "$2"
+      fi
+      ;;
+    list)
+      list_demos
+      ;;
+    running)
+      list_running
+      ;;
+    clean)
+      clean_all "$1"
+      ;;
+    reset)
+      reset_all "$1"
+      ;;
+    help | --help | -h | "")
+      show_usage
+      ;;
+    *)
+      print_error "Unknown command: $command"
+      show_usage
+      exit 1
+      ;;
   esac
 }
 

@@ -329,6 +329,11 @@ install_brewfile_dependencies() {
 install_amp_cli() {
   if ! command_exists "amp"; then
     print_info "Installing Amp CLI..."
+
+    # Use repository temp directory to avoid system temp permission issues
+    export TMPDIR="$repo_dir/.tmp"
+    mkdir -p "$TMPDIR"
+
     if curl -fsSL https://ampcode.com/install.sh | bash; then
       print_success "Amp CLI installed successfully"
     else
