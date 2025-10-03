@@ -77,17 +77,6 @@ jobs:
       - name: Run build
         run: mise exec -- task build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ inputs.language }}-${{ inputs.framework }}
-          path: |
-            ${{ inputs.demo_path }}/build
-            ${{ inputs.demo_path }}/dist
-            ${{ inputs.demo_path }}/.next
-          retention-days: 1
-          if-no-files-found: ignore
-
   test:
     name: Test
     runs-on: ubuntu-24.04
@@ -115,12 +104,6 @@ jobs:
           key: deps-${{ inputs.language }}-${{ inputs.framework }}-${{ hashFiles(format('{0}/pnpm-lock.yaml', inputs.demo_path), format('{0}/requirements.txt', inputs.demo_path), format('{0}/build.gradle*', inputs.demo_path)) }}
           restore-keys: |
             deps-${{ inputs.language }}-${{ inputs.framework }}-
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-${{ inputs.language }}-${{ inputs.framework }}
-          path: ${{ inputs.demo_path }}
 
       - name: Run tests
         run: mise exec -- task test
