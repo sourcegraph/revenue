@@ -462,8 +462,8 @@ configure_mise() {
   # Install all mise dependencies in each directory with a mise config (deduplicated)
   print_info "Installing mise dependencies..."
 
-  find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print |
-    xargs -n1 dirname |
+  find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print0 |
+    xargs -0 -n1 dirname |
     sort -u |
     while IFS= read -r config_dir; do
       (cd "$config_dir" && mise install >/dev/null 2>&1) || true
