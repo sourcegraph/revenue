@@ -16,14 +16,6 @@ runs:
         curl https://mise.run | sh
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    - name: Cache mise tools
-      uses: actions/cache@v4
-      with:
-        path: ~/.local/share/mise
-        key: mise-${{ runner.os }}-${{ hashFiles(format('{0}/.mise.toml', inputs.working-directory)) }}-${{ hashFiles(format('{0}/../.mise.toml', inputs.working-directory)) }}-${{ hashFiles(format('{0}/../../.mise.toml', inputs.working-directory)) }}
-        restore-keys: |
-          mise-${{ runner.os }}-
-
     - name: Install tools via mise
       shell: bash
       working-directory: ${{ inputs.working-directory }}
