@@ -8,7 +8,7 @@ needed for demos and development.
 **Copy and paste this command into Terminal:**
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://github.com/sourcegraph/revenue/releases/latest/download/install.sh)"
+curl -fsSL https://github.com/sourcegraph/revenue/releases/latest/download/install.sh | bash
 ```
 
 **That's it!** The installer will:
@@ -71,7 +71,7 @@ If you're stuck:
 1. Check the error message for specific guidance
 2. Try running the installer again (it's safe to repeat)
 3. Ask in [#discuss-field-engineering](https://sourcegraph.slack.com/archives/C095PTMTS31)
-with the error details
+   with the error details
 
 ## Manual Setup (Alternative)
 
@@ -98,7 +98,7 @@ To install the repository to a different location:
 
 ```bash
 # Download installer directly
-curl -fsSL https://raw.githubusercontent.com/sourcegraph/revenue/main/install.sh | bash -s -- --install-path /custom/path
+curl -fsSL https://github.com/sourcegraph/revenue/releases/latest/download/install.sh | bash -s -- --install-path /custom/path
 
 # Or clone first and run locally (recommended for custom paths)
 git clone https://github.com/sourcegraph/revenue.git /custom/path
