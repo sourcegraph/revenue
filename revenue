@@ -396,11 +396,11 @@ trust_and_install_mise() {
 
   cd "$SCRIPT_DIR"
   print_info "Trusting mise configurations in repository..."
-  
+
   find . -path './.git' -prune -o -type f \( -name '.mise.toml' -o -name '.tool-versions' \) -print | while IFS= read -r config_file; do
     mise trust "$config_file" >/dev/null 2>&1 || true
   done
-  
+
   print_success "Trusted all mise configurations in repository"
 
   print_info "Installing mise dependencies..."
