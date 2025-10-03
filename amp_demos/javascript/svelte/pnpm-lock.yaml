@@ -24,7 +24,7 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
       vite:
-        specifier: ^5.4.10
+        specifier: ^5.4.20
         version: 5.4.20
 
 packages:
