@@ -2,5 +2,19 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>sourcegraph/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "matchPaths": ["amp_demos/javascript/**"],
+      "groupName": "javascript demos"
+    },
+    {
+      "matchPaths": ["amp_demos/java/**"],
+      "groupName": "java demos"
+    },
+    {
+      "matchPaths": ["amp_demos/python/**"],
+      "groupName": "python demos"
+    }
   ]
 }
