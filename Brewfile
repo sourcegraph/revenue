@@ -9,8 +9,12 @@ brew "mise"
 brew "python"
 brew "tmux"
 brew "overmind"
+brew "neovim"
 brew "tree" 
 brew "yq"
+
+# Fonts
+brew "font-jetbrains-mono-nerd-font"
 
 # Applications
 cask "ghostty"
