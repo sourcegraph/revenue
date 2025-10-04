@@ -1,5 +1,5 @@
 [tools]
-node = "20"
+node = "20.19.5"
 
 [tasks.install]
 description = "Install dependencies"
