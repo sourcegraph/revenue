@@ -25,7 +25,7 @@ jobs:
         working-directory: ${{ inputs.demo_path }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup mise
         uses: ./.github/actions/setup-mise
@@ -55,7 +55,7 @@ jobs:
         working-directory: ${{ inputs.demo_path }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup mise
         uses: ./.github/actions/setup-mise
@@ -86,7 +86,7 @@ jobs:
         working-directory: ${{ inputs.demo_path }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup mise
         uses: ./.github/actions/setup-mise
