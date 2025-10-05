@@ -418,22 +418,25 @@ clean_all() {
   print_success "Cleaned up all demo processes and sockets"
 }
 
-# Reset all demos to clean git state
+# Reset demos in amp_demos folder to clean git state
 reset_all() {
   local confirm_flag="$1"
 
   if [[ "$confirm_flag" != "--confirm" ]]; then
-    print_error "This will forcibly kill all processes AND revert all file changes!"
+    print_error "This will forcibly kill all demo processes AND revert all file changes in amp_demos!"
     print_error "All modifications made during demo sessions will be lost!"
     print_error "Use: demo reset --confirm"
     return 1
   fi
 
-  print_warning "Resetting all demo applications to clean state..."
+  print_warning "Resetting demo applications to clean state..."
 
   # First clean up all processes and sockets
   clean_all --confirm
 
+  # Reset only the amp_demos directory
+  cd "$REPO_ROOT/amp_demos"
+  
   # Check if we're in a git repository
   if ! git rev-parse --git-dir >/dev/null 2>&1; then
     print_error "Not in a git repository - cannot reset file changes"
@@ -444,12 +447,13 @@ reset_all() {
     print_warning "Some files could not be restored (may not exist in git)"
   fi
 
-  if ! git clean -fd 2>/dev/null; then
+  if ! git clean -fd . 2>/dev/null; then
     print_warning "Some untracked files could not be cleaned"
   fi
 
-  print_success "Reset complete - all demo applications restored to clean git state"
+  print_success "Reset complete - demo applications in amp_demos restored to clean git state"
   print_info "Run 'demo start all' to start fresh demo sessions"
+  print_info "Note: Use 'revenue reset --confirm' to reset the entire repository"
 }
 
 # Show usage
@@ -470,8 +474,10 @@ show_usage() {
   echo "  demo list                           List all demos with status"
   echo "  demo running                        List only running demos"
   echo "  demo clean --confirm                Force cleanup all processes and sockets"
-  echo "  demo reset --confirm                Reset to clean git state (clean + git restore)"
+  echo "  demo reset --confirm                Reset amp_demos folder to clean git state"
   echo "  demo help                           Show this help"
+  echo ""
+  echo "Note: Use 'revenue reset --confirm' to reset the entire repository"
   echo ""
   echo "Examples:"
   echo "  demo start python flask"

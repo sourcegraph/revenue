@@ -66,6 +66,8 @@ COMMANDS:
     
     update      Update existing tools and packages
     
+    reset       Reset all demos and restore repository to clean state
+    
     demo        Manage demo applications (delegates to amp_demos/demo.sh)
     
     help        Show this help message
@@ -74,6 +76,7 @@ EXAMPLES:
     revenue init
     revenue init --install-path /custom/path
     revenue update
+    revenue reset --confirm
     revenue demo start python flask
     revenue help
 
@@ -426,6 +429,46 @@ update_environment() {
   print_success "Environment update completed!"
 }
 
+# Reset entire repository to clean state
+reset_environment() {
+  local confirm_flag="$1"
+
+  if [[ "$confirm_flag" != "--confirm" ]]; then
+    print_error "This will forcibly kill all demo processes AND revert all file changes in the ENTIRE repository!"
+    print_error "All uncommitted modifications will be lost!"
+    print_error "Use: revenue reset --confirm"
+    print_info "Note: Use 'revenue demo reset --confirm' to reset only the amp_demos folder"
+    exit 1
+  fi
+
+  print_warning "Resetting entire repository to clean state..."
+
+  # Clean up all demo processes and sockets
+  print_warning "Cleaning up all demo applications..."
+  cd "$SCRIPT_DIR/amp_demos"
+  bash "./demo" clean --confirm
+
+  # Reset from repository root to catch all changes
+  cd "$SCRIPT_DIR"
+  
+  # Check if we're in a git repository
+  if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    print_error "Not in a git repository - cannot reset file changes"
+    exit 1
+  fi
+
+  if ! git restore . 2>/dev/null; then
+    print_warning "Some files could not be restored (may not exist in git)"
+  fi
+
+  if ! git clean -fd 2>/dev/null; then
+    print_warning "Some untracked files could not be cleaned"
+  fi
+
+  print_success "Reset complete - entire repository restored to clean git state"
+  print_info "Run 'revenue demo start all' to start fresh demo sessions"
+}
+
 # Main function
 main() {
   local action="${1:-}"
@@ -437,6 +480,10 @@ main() {
       ;;
     "update")
       update_environment
+      ;;
+    "reset")
+      shift # Remove 'reset' from arguments
+      reset_environment "$@"
       ;;
     "demo")
       # Delegate to amp_demos/demo with remaining arguments
