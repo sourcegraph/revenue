@@ -5,15 +5,21 @@
   ],
   "packageRules": [
     {
-      "matchPaths": ["amp_demos/javascript/**"],
+      "matchFileNames": [
+        "amp_demos/javascript/**"
+      ],
       "groupName": "javascript demos"
     },
     {
-      "matchPaths": ["amp_demos/java/**"],
+      "matchFileNames": [
+        "amp_demos/java/**"
+      ],
       "groupName": "java demos"
     },
     {
-      "matchPaths": ["amp_demos/python/**"],
+      "matchFileNames": [
+        "amp_demos/python/**"
+      ],
       "groupName": "python demos"
     }
   ]
