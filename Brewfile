@@ -14,7 +14,7 @@ brew "tree"
 brew "yq"
 
 # Fonts
-brew "font-jetbrains-mono-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
 
 # Applications
 cask "ghostty"
