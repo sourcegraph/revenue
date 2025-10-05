@@ -6,20 +6,66 @@ inputs:
     description: Directory containing .mise.toml
     required: true
     default: '.'
+  mise-version:
+    description: mise version (e.g., v2024.9.4). Use 'latest' to auto-resolve.
+    required: false
+    default: 'latest'
 
 runs:
   using: composite
   steps:
-    - name: Install mise
+    - name: Resolve mise version
+      id: resolve-mise-version
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
-        curl https://mise.run | sh
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        ver="${{ inputs.mise-version }}"
+        if [ "$ver" = "latest" ]; then
+          ver="$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/jdx/mise/releases/latest | jq -r .tag_name)"
+        fi
+        echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+    - name: Cache mise binary
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/bin/mise
+        key: mise-bin-${{ runner.os }}-${{ steps.resolve-mise-version.outputs.version }}
+
+    - name: Install/Update mise
+      shell: bash
+      env:
+        TARGET_VER: ${{ steps.resolve-mise-version.outputs.version }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$HOME/.local/bin"
+        current_ver="$(command -v mise >/dev/null 2>&1 && mise --version | awk '{print $2}' || echo '')"
+        if [ "$current_ver" != "$TARGET_VER" ]; then
+          curl -fsSL https://mise.run | MISE_VERSION="$TARGET_VER" sh
+        fi
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Cache mise installs
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.local/share/mise
+          ~/.cache/mise
+        key: mise-installs-${{ runner.os }}-${{ steps.resolve-mise-version.outputs.version }}-${{ github.ref }}-${{ hashFiles(format('{0}/.mise.toml', inputs.working-directory), format('{0}/.tool-versions', inputs.working-directory)) }}
+        restore-keys: |
+          mise-installs-${{ runner.os }}-${{ steps.resolve-mise-version.outputs.version }}-refs/heads/${{ github.base_ref }}-
+          mise-installs-${{ runner.os }}-${{ steps.resolve-mise-version.outputs.version }}-${{ github.ref }}-
+          mise-installs-${{ runner.os }}-${{ steps.resolve-mise-version.outputs.version }}-
 
     - name: Install tools via mise
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
-        mise trust
+        set -euo pipefail
+        mise trust --yes
         mise install
-        mise exec -- task --version || mise exec -- go install github.com/go-task/task/v3/cmd/task@latest
+        if ! mise exec -- task --version >/dev/null 2>&1; then
+          mise exec -- go install github.com/go-task/task/v3/cmd/task@latest
+        fi
