@@ -3,7 +3,7 @@ name = "python-flask-demo"
 version = "0.1.0"
 description = "An application to demo using Amp with Python and Flask"
 readme = "README.md"
-requires-python = ">=3.13.7"
+requires-python = ">=3.14.0"
 dependencies = ["flask>=3.1.2,<3.2", "python-dotenv>=1.1.1,<1.2"]
 
 [project.optional-dependencies]
