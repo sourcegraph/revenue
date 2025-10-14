@@ -2,13 +2,6 @@ name: Demo - Python Flask
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "amp_demos/python/flask/**"
-      - ".github/workflows/demo-python-flask.yml"
-      - ".github/workflows/_demo-ci.yml"
-      - ".github/actions/setup-mise/**"
-  pull_request:
     paths:
       - "amp_demos/python/flask/**"
       - ".github/workflows/demo-python-flask.yml"

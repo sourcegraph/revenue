@@ -2,13 +2,6 @@ name: Demo - Java Ktor
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "amp_demos/java/ktor/**"
-      - ".github/workflows/demo-java-ktor.yml"
-      - ".github/workflows/_demo-ci.yml"
-      - ".github/actions/setup-mise/**"
-  pull_request:
     paths:
       - "amp_demos/java/ktor/**"
       - ".github/workflows/demo-java-ktor.yml"

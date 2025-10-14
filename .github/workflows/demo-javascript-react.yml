@@ -2,13 +2,6 @@ name: Demo - JavaScript React
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "amp_demos/javascript/react/**"
-      - ".github/workflows/demo-javascript-react.yml"
-      - ".github/workflows/_demo-ci.yml"
-      - ".github/actions/setup-mise/**"
-  pull_request:
     paths:
       - "amp_demos/javascript/react/**"
       - ".github/workflows/demo-javascript-react.yml"
