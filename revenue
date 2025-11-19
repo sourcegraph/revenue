@@ -70,6 +70,8 @@ COMMANDS:
     
     demo        Manage demo applications (delegates to amp_demos/demo.sh)
     
+    uninstall   Remove configuration and files (delegates to uninstall.sh)
+    
     help        Show this help message
 
 EXAMPLES:
@@ -78,6 +80,7 @@ EXAMPLES:
     revenue update
     revenue reset --confirm
     revenue demo start python flask
+    revenue uninstall
     revenue help
 
 For more information, visit: https://github.com/sourcegraph/revenue
@@ -490,6 +493,10 @@ main() {
       shift # Remove 'demo' from arguments
       cd "$SCRIPT_DIR/amp_demos"
       exec bash "./demo" "$@"
+      ;;
+    "uninstall")
+      shift # Remove 'uninstall' from arguments
+      exec bash "$SCRIPT_DIR/uninstall.sh" "$@"
       ;;
     "help" | "-h" | "--help")
       show_help
