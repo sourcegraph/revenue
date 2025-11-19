@@ -146,7 +146,8 @@ clean_shell_profile() {
   shell_type=$(detect_shell)
   local profile_path
   profile_path=$(get_shell_profile "$shell_type")
-  local profile_backup="${profile_path}.bak.$(date +%s)"
+  local profile_backup
+  profile_backup="${profile_path}.bak.$(date +%s)"
 
   if [[ -f "$profile_path" ]]; then
     print_info "Checking shell profile: $(basename "$profile_path")"
