@@ -27,7 +27,7 @@ runs:
         echo "version=$ver" >> "$GITHUB_OUTPUT"
 
     - name: Cache mise binary
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.local/bin/mise
         key: mise-bin-${{ runner.os }}-${{ steps.resolve-mise-version.outputs.version }}
@@ -46,7 +46,7 @@ runs:
         echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
     - name: Cache mise installs
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.local/share/mise
